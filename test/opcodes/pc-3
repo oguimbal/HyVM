@@ -1,0 +1,16 @@
+# https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic
+PC
+PC
+JUMPDEST
+JUMPDEST
+JUMPDEST
+PC
+ADD
+ADD
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

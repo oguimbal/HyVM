@@ -1,0 +1,10 @@
+# bytecode to set the verifier of a contract
+
+# push the verifier contract (will be replaced at runtime)
+PUSH20 0x1231231231231231231231231231231231231231
+
+# push the slot to store (see CALL_VERIFIER_SSLOT in NVM.huff)
+PUSH32 0x58a8a9223af434080477cd2d1a2667aba3ce9f1301007611a4d07a0af708e65a
+
+# store it
+SSTORE

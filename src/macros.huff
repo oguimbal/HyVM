@@ -1,0 +1,101 @@
+// two storage slots:
+#define constant REENTRANT_SSLOT = 0xda8b995e2670b58d57272b2d0b50f8c7de2a7e927b4b9b06444cd9e378d215fb
+#define constant OWNER_SSLOT = 0x240bb37aa812ad108aae08a4b01536038aac1692fa2f4eabbc4a8a540d93e0be
+
+// no reentrency
+#define macro NON_REENTRANT() = takes (0) returns (0) {
+    [REENTRANT_SSLOT]  // load execution
+    sload        // [lock]
+    iszero       // [is_unlocked]
+    unlocked     // [unlocked_jumpdest]
+    jumpi        // []
+    0x00         // [size]
+    0x00         // [offset, size]
+    revert       // []
+    unlocked:    // []
+    0x01         // [lock_value]
+    [REENTRANT_SSLOT]  // [reentrant_sslot, lock_value]
+    sstore       // []
+}
+
+
+// increment the execution pointer location by one byte
+#define macro INCREMENT_EXEC_PTR() = takes(0) returns (0) {
+    0x1
+    INCREMENT_EXEC_PTR_N()
+}
+
+// increment the execution pointer location by the amount given on stack
+#define macro INCREMENT_EXEC_PTR_N() = takes(1) returns (0) {
+    // load current
+    [EXEC_POINTER_MSLOT] mload
+    // add with value on stack
+    add
+    // and store it back
+    [EXEC_POINTER_MSLOT] mstore
+}
+
+
+// pushes data that has the given size
+#define macro PICK_DATA() = takes(1) returns (1) {
+    dup1 // duplicate num of bytes // => [n, n]
+
+    // will be shifted by: (32 - n)
+    0x20 // => [0x20, n, n]
+    sub //  => [shiftBy, n]
+
+    // get 256 bits at execution pointer
+    [EXEC_POINTER_MSLOT] mload  // => [exec ptr, shiftBy, n]
+    calldataload // => [256 bits of code, shiftBy, n]
+
+    // truncate it
+    swap1 // => [shiftBy, code, n]
+    0x8 mul
+    shr //  => [ret, n]
+
+    // increment pointer
+    swap1 // => [n, ret]
+    INCREMENT_EXEC_PTR_N() // => [ret]
+}
+
+/**
+copy memory
+takes: size source target
+*/
+#define macro MEM_COPY() = takes(3) returns (0) {
+
+    memcpy_one:
+    //  -> [size source target]
+    // if nothing to copy, then return
+    dup1 iszero memcpy_end jumpi
+
+    // copy one word (might embed a bit of extra memory if size is not multiple of 0x20, but its ok)
+    dup2 mload // => [data size source target]
+    dup4 mstore // => [size source target]
+
+    // decrement size by 0x20, but maxed to size (size might not be a multiple of 0x20)
+    0x20 dup2 lt // is size lower than 0x20 ? => [isSmall, size, source, target]
+
+    memcpy_end jumpi // jump to end if smaller => [size, source, target]
+
+    // decrement count
+    0x20 swap1 sub // => [new size, source, target]
+    // increment source
+    swap1 0x20 add swap1 // => [new size, new source, target]
+    // increment target
+    swap2 0x20 add swap2 // => [new size, new source, new target]
+
+    // restart
+    memcpy_one jump
+    memcpy_end:
+    pop pop pop
+}
+
+
+#define macro ONLY_OWNER() = takes(0) returns(0) {
+    [OWNER_SSLOT] sload
+    dup1 caller eq is_owner jumpi
+    0x0 eq is_owner jumpi // allow when there is no owner
+    0x00 0x00 revert
+    is_owner:
+}

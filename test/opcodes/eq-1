@@ -1,0 +1,12 @@
+# https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic
+
+PUSH1 0x10
+PUSH1 0x10
+EQ
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

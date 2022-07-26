@@ -1,0 +1,17 @@
+# https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic
+# Put the required value in memory
+PUSH32 0xFFFFFFFF00000000000000000000000000000000000000000000000000000000
+PUSH1 0x00
+MSTORE
+
+# Call the opcode
+PUSH1 0x04
+PUSH1 0x00
+SHA3
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN
