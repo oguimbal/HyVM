@@ -1,0 +1,17 @@
+// jump table will be located at 0x20, after the execution pointer
+#define constant OPCODES_JUMPTABLE_MSLOT = 0x20
+
+#define macro CHECK_DELEGATECALL() = takes(0) returns (0) {
+}
+
+#define macro CHECK_STATICCALL() = takes(0) returns (0) {
+}
+
+#define macro CHECK_CALLCODE() = takes(0) returns (0) {
+}
+
+#define macro CHECK_CALL() = takes(0) returns (0) {
+}
+
+#define macro CHECK_SSTORE() = takes(0) returns (0) {
+}

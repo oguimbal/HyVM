@@ -2,7 +2,8 @@
 // TODO emit nice reverts https://docs.huff.sh/get-started/huff-by-example/#custom-errors
 #include "debug-utils.huff"
 #include "macros.huff"
-#include "./checkers/contract-verifier.huff"
+// #include "./checkers/contract-verifier.huff"
+#include "./checkers/no-verifier.huff"
 
 // === define where we'll store VM private things
 
