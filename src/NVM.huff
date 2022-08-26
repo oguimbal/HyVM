@@ -141,14 +141,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
 
 
-#define macro CONSTRUCTOR() = takes(0) returns (0) {
-    // Set msg.sender as the owner
-    // this will ensure that when called with a regular call (not a delegatecall), nobody can take ownership here.
-    // (but people will be able to take ownership on their own instance because ONLY_OWNER is OK when there is no owner set)
-    caller [OWNER_SSLOT] sstore
-}
-
-
 // start program
 #define macro MAIN() = takes(0) returns (0) {
 
@@ -300,14 +292,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_calldataload:
         pop //  => [] dont need the opcode
 
-        // getting calldata is not supported in a vm
+        // getting calldata is not supported in a vm => load a 0
 
-        // console.log('calldataload not supported')
-        0x63616c6c646174616c6f6164206e6f7420737570706f72746564000000000000
-        0x000000000000000000000000000000000000000000000000000000000000001a
-        CONSOLE_LOG()
+        0x00
 
-        0x00 0x00 revert
+        CONTINUE()
 
     op_calldatasize:
         pop //  => [] dont need the opcode
@@ -319,12 +308,16 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_calldatacopy:
         pop //  => [] dont need the opcode
 
-        // console.log('calldatacopy not supported')
-        0x63616c6c64617461636f7079206e6f7420737570706f72746564000000000000
-        0x000000000000000000000000000000000000000000000000000000000000001a
-        CONSOLE_LOG()
+        // getting calldata is not supported in a vm
+        // => copy zeros (by running calldatacopy with an index which is after the current calldata)
 
-        0x00 0x00 revert
+        swap1
+        calldatasize
+        add
+        swap1
+        calldatacopy
+
+        CONTINUE()
 
     op_codesize:
         pop //  => [] dont need the opcode
@@ -731,6 +724,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         return
     op_delegatecall:
         pop //  => [] dont need the opcode
+
+        // TODO: we could think about also executing the delegatecall code in NVM, by loading
+        //  the target contract code via extcodecopy, and then running a delegatecall to this contract (nvm)
+        //  with the target contract's code as calldata, along with the actual calldata
+        //   => then, must think about some kind of interface to detect that this is such call,
+        //    and modify the calldataload, calldatasize and calldatacopy implementations
 
         // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
         // - fix argsOffset

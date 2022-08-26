@@ -2,6 +2,8 @@
 
 // will store the reentrency slot in a random storage slot
 #define constant CALL_VERIFIER_SSLOT = 0x58a8a9223af434080477cd2d1a2667aba3ce9f1301007611a4d07a0af708e65a
+#define constant REENTRANT_SSLOT = 0xda8b995e2670b58d57272b2d0b50f8c7de2a7e927b4b9b06444cd9e378d215fb
+#define constant OWNER_SSLOT = 0x240bb37aa812ad108aae08a4b01536038aac1692fa2f4eabbc4a8a540d93e0be
 
 
 // used to store the result of call checking (1 word)
@@ -208,4 +210,38 @@ Checks that a call can be performed
     ONLY_OWNER()
 
     checksstore_success:
+}
+
+
+
+#define macro CONSTRUCTOR() = takes(0) returns (0) {
+    // Set msg.sender as the owner
+    // this will ensure that when called with a regular call (not a delegatecall), nobody can take ownership here.
+    // (but people will be able to take ownership on their own instance because ONLY_OWNER is OK when there is no owner set)
+    caller [OWNER_SSLOT] sstore
+}
+
+// no reentrency
+#define macro NON_REENTRANT() = takes (0) returns (0) {
+    [REENTRANT_SSLOT]  // load execution
+    sload        // [lock]
+    iszero       // [is_unlocked]
+    unlocked     // [unlocked_jumpdest]
+    jumpi        // []
+    0x00         // [size]
+    0x00         // [offset, size]
+    revert       // []
+    unlocked:    // []
+    0x01         // [lock_value]
+    [REENTRANT_SSLOT]  // [reentrant_sslot, lock_value]
+    sstore       // []
+}
+
+
+#define macro ONLY_OWNER() = takes(0) returns(0) {
+    [OWNER_SSLOT] sload
+    dup1 caller eq is_owner jumpi
+    0x0 eq is_owner jumpi // allow when there is no owner
+    0x00 0x00 revert
+    is_owner:
 }
