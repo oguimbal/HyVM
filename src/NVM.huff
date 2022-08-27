@@ -28,8 +28,8 @@ op_sha3             unused          unused          unused      unused          
 op_address          op_balance      op_origin       op_caller   op_callvalue    op_calldataload op_calldatasize op_calldatacopy     op_codesize     op_codecopy     op_gasprice     op_extcodesize  op_extcodecopy  op_returndatasize   op_returndatacopy   op_extcodehash
 op_blockhash        op_coinbase     op_timestamp    op_number   op_difficulty   op_gaslimit     op_chainid      op_selfbalance      op_basefee      unused          unused          unused          unused          unused              unused              unused
 op_pop              op_mload        op_mstore       op_mstore8  op_sload        op_sstore       op_jump         op_jumpi            op_pc           op_msize        op_gas          op_jumpdest     unused          unused              unused              unused
-op_pushi            op_pushi        op_pushi        op_pushi    op_pushi        op_pushi        op_pushi        op_pushi            op_pushi        op_pushi        op_pushi        op_pushi        op_pushi        op_pushi            op_pushi            op_pushi
-op_pushi            op_pushi        op_pushi        op_pushi    op_pushi        op_pushi        op_pushi        op_pushi            op_pushi        op_pushi        op_pushi        op_pushi        op_pushi        op_pushi            op_pushi            op_pushi
+op_push1            op_push2        op_push3        op_push4    op_push5        op_push6        op_push7        op_push8            op_push9        op_push10       op_push11       op_push12       op_push13       op_push14           op_push15           op_push16
+op_push17           op_push18       op_push19       op_push20   op_push21       op_push22       op_push23       op_push24           op_push25       op_push26       op_push27       op_push28       op_push29       op_push30           op_push31           op_push32
 op_dup1             op_dup2         op_dup3         op_dup4     op_dup5         op_dup6         op_dup7         op_dup8             op_dup9         op_dup10        op_dup11        op_dup12        op_dup13        op_dup14            op_dup15            op_dup16
 op_swap1            op_swap2        op_swap3        op_swap4    op_swap5        op_swap6        op_swap7        op_swap8            op_swap9        op_swap10       op_swap11       op_swap12       op_swap13       op_swap14           op_swap15           op_swap16
 op_log0             op_log1         op_log2         op_log3     op_log4         unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
@@ -131,10 +131,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     // // console.log(opcode)
     // CONSOLE_LOG_UINT()
 
-    // todo reactor this ?
-    // pushi nees to have the opcode on stack (but this forces all other opcodes to pop before execution)
-    dup1 // => [opcode, opcode]
-
     // jump to the operation given on stack
     JUMP_TO_OPCODE()
 }
@@ -144,8 +140,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 // start program
 #define macro MAIN() = takes(0) returns (0) {
 
-    // check that we're not re-entring in the contract
-    // NON_REENTRANT()
     INIT_JUMPTABLE()
     CONTINUE()
 
@@ -161,136 +155,103 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONSOLE_LOG_UINT() // log opcode
 
     op_stop:
-        pop //  => [] dont need the opcode
         stop
         CONTINUE()
     op_add:
-        pop //  => [] dont need the opcode
         add
 
         CONTINUE()
     op_mul:
-        pop //  => [] dont need the opcode
         mul
         CONTINUE()
     op_sub:
-        pop //  => [] dont need the opcode
         sub
         CONTINUE()
     op_div:
-        pop //  => [] dont need the opcode
         div
         CONTINUE()
     op_sdiv:
-        pop //  => [] dont need the opcode
         sdiv
         CONTINUE()
     op_mod:
-        pop //  => [] dont need the opcode
         mod
         CONTINUE()
     op_smod:
-        pop //  => [] dont need the opcode
         smod
         CONTINUE()
     op_addmod:
-        pop //  => [] dont need the opcode
         addmod
         CONTINUE()
     op_mulmod:
-        pop //  => [] dont need the opcode
         mulmod
         CONTINUE()
     op_exp:
-        pop //  => [] dont need the opcode
         exp
         CONTINUE()
     op_signextend:
-        pop //  => [] dont need the opcode
         signextend
         CONTINUE()
     op_lt:
-        pop //  => [] dont need the opcode
         lt
         CONTINUE()
     op_gt:
-        pop //  => [] dont need the opcode
         gt
         CONTINUE()
     op_slt:
-        pop //  => [] dont need the opcode
         slt
         CONTINUE()
     op_sgt:
-        pop //  => [] dont need the opcode
         sgt
         CONTINUE()
     op_eq:
-        pop //  => [] dont need the opcode
         eq
         CONTINUE()
     op_iszero:
-        pop //  => [] dont need the opcode
         iszero
         CONTINUE()
     op_and:
-        pop //  => [] dont need the opcode
         and
         CONTINUE()
     op_or:
-        pop //  => [] dont need the opcode
         or
         CONTINUE()
     op_xor:
-        pop //  => [] dont need the opcode
         xor
         CONTINUE()
     op_not:
-        pop //  => [] dont need the opcode
         not
         CONTINUE()
     op_byte:
-        pop //  => [] dont need the opcode
         byte
         CONTINUE()
     op_shl:
-        pop //  => [] dont need the opcode
         shl
         CONTINUE()
     op_shr:
-        pop //  => [] dont need the opcode
         shr
         CONTINUE()
     op_sar:
-        pop //  => [] dont need the opcode
         sar
         CONTINUE()
     op_sha3:
-        pop //  => [] dont need the opcode
         sha3
         CONTINUE()
     op_address:
-        pop //  => [] dont need the opcode
         address
         CONTINUE()
     op_balance:
-        pop //  => [] dont need the opcode
         balance
         CONTINUE()
     op_origin:
-        pop //  => [] dont need the opcode
         origin
         CONTINUE()
     op_caller:
-        pop //  => [] dont need the opcode
         caller
         CONTINUE()
     op_callvalue:
-        pop //  => [] dont need the opcode
         callvalue
         CONTINUE()
     op_calldataload:
-        pop //  => [] dont need the opcode
 
         // getting calldata is not supported in a vm => load a 0
 
@@ -299,14 +260,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_calldatasize:
-        pop //  => [] dont need the opcode
 
         // no call data
         0x0
         CONTINUE()
 
     op_calldatacopy:
-        pop //  => [] dont need the opcode
 
         // getting calldata is not supported in a vm
         // => copy zeros (by running calldatacopy with an index which is after the current calldata)
@@ -320,7 +279,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_codesize:
-        pop //  => [] dont need the opcode
 
         // code size is the same as calldata size
         calldatasize
@@ -328,7 +286,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_codecopy:
-        pop //  => [] dont need the opcode
 
         // codecopy is the same as calldatacopy
         calldatasize
@@ -336,70 +293,54 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_gasprice:
-        pop //  => [] dont need the opcode
         gasprice
         CONTINUE()
     op_extcodesize:
-        pop //  => [] dont need the opcode
         extcodesize
         CONTINUE()
     op_extcodecopy:
-        pop //  => [] dont need the opcode
         extcodecopy
         CONTINUE()
     op_returndatasize:
-        pop //  => [] dont need the opcode
         returndatasize
         CONTINUE()
     op_returndatacopy:
-        pop //  => [] dont need the opcode
         returndatacopy
         CONTINUE()
     op_extcodehash:
-        pop //  => [] dont need the opcode
         extcodehash
         CONTINUE()
     op_blockhash:
-        pop //  => [] dont need the opcode
         blockhash
         CONTINUE()
     op_coinbase:
-        pop //  => [] dont need the opcode
         coinbase
         CONTINUE()
     op_timestamp:
-        pop //  => [] dont need the opcode
         timestamp
         CONTINUE()
     op_number:
-        pop //  => [] dont need the opcode
         number
         CONTINUE()
     op_difficulty:
-        pop //  => [] dont need the opcode
         difficulty
         CONTINUE()
     op_gaslimit:
-        pop //  => [] dont need the opcode
         gaslimit
         CONTINUE()
     op_chainid:
-        pop //  => [] dont need the opcode
         chainid
         CONTINUE()
     op_selfbalance:
-        pop //  => [] dont need the opcode
         selfbalance
         CONTINUE()
     op_basefee:
         // basefee not supported by huff ?!
         notimplemented jump
     op_pop:
-        pop //  => [] dont need the opcode
         pop
         CONTINUE()
     op_mload:
-        pop //  => [] dont need the opcode
 
         // fix the memory offset load from, and execute
         FIX_MEMOFFSET()
@@ -407,7 +348,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         CONTINUE()
     op_mstore:
-        pop //  => [] dont need the opcode
 
         // fix the memory offset to store at, and execute
         FIX_MEMOFFSET()
@@ -416,7 +356,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_mstore8:
-        pop //  => [] dont need the opcode
 
         // fix the memory offset to store at, and execute
         FIX_MEMOFFSET()
@@ -424,11 +363,9 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         CONTINUE()
     op_sload:
-        pop //  => [] dont need the opcode
         sload
         CONTINUE()
     op_sstore:
-        pop //  => [] dont need the opcode
 
         // check can store things here
         CHECK_SSTORE()
@@ -436,7 +373,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         sstore
         CONTINUE()
     op_jump:
-        pop //  => [] dont need the opcode
 
         op_jump_impl:
             // move pointer to location
@@ -455,14 +391,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
                 0x00 0x00 revert
 
     op_jumpi:
-        pop //  => [] dont need the opcode
 
         swap1 // get the condition on top
         op_jump_impl jumpi // goto jump if condition is ok
         CONTINUE() // otherwise, continue
 
     op_pc:
-        pop //  => [] dont need the opcode
 
         // load pointer, but it has advanced => remove 1
         0x1
@@ -472,7 +406,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_msize:
-        pop //  => [] dont need the opcode
 
         // get hypervisor's reserved memory size
         0x0
@@ -485,198 +418,259 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_gas:
-        pop //  => [] dont need the opcode
         gas
         CONTINUE()
     op_jumpdest:
-        pop //  => [] dont need the opcode
         // do nothing
         CONTINUE()
 
-    op_pushi:
-        // TODO refactor... this can be much more efficient.
-        // 1) avoid an mload and a calldataload
-        //       instead of 'dup1' leading to stack [opcode, opcode] before call to JUMP_TO_OPCODE(),
-        //        have a stack like [instruction, opcode], then pick data directly from instruction.
-        //      nb: this wont work for push32, which will need a calldataload :/ (because the instruction is offseted by one byte of opcode)
-        //
-        // 2) avoid having a 'pop' by any other instruction just because we need it in push
-        //
-        // 3) avoid an mload and an mstore by not calling INCREMENT_EXEC_PTR_N() in mstore...
-        //    embbed this logic in the exec pointer incrementation which is in CONTINUE()
-        //    but not with branching... prefer masking, multiplications, adds, ... find something clever.
-        //
-        // 4) maybe the multiple-implementation is more effective ? (op_push1, op_push2,... instead of only one op_pushi)
-
-
-        // compute the number of bytes to push, based on the opcode
-        0x5f // => [0x5f, opcode]
-        swap1  // => [opcode, 0x5f]
-        sub //  => [i]
-
-        // get data to push
+    op_push1:
+        0x01
         PICK_DATA()
-
+        CONTINUE()
+    op_push2:
+        0x02
+        PICK_DATA()
+        CONTINUE()
+    op_push3:
+        0x03
+        PICK_DATA()
+        CONTINUE()
+    op_push4:
+        0x04
+        PICK_DATA()
+        CONTINUE()
+    op_push5:
+        0x05
+        PICK_DATA()
+        CONTINUE()
+    op_push6:
+        0x06
+        PICK_DATA()
+        CONTINUE()
+    op_push7:
+        0x07
+        PICK_DATA()
+        CONTINUE()
+    op_push8:
+        0x08
+        PICK_DATA()
+        CONTINUE()
+    op_push9:
+        0x09
+        PICK_DATA()
+        CONTINUE()
+    op_push10:
+        0x0a
+        PICK_DATA()
+        CONTINUE()
+    op_push11:
+        0x0b
+        PICK_DATA()
+        CONTINUE()
+    op_push12:
+        0x0c
+        PICK_DATA()
+        CONTINUE()
+    op_push13:
+        0x0d
+        PICK_DATA()
+        CONTINUE()
+    op_push14:
+        0x0e
+        PICK_DATA()
+        CONTINUE()
+    op_push15:
+        0x0f
+        PICK_DATA()
+        CONTINUE()
+    op_push16:
+        0x10
+        PICK_DATA()
+        CONTINUE()
+    op_push17:
+        0x11
+        PICK_DATA()
+        CONTINUE()
+    op_push18:
+        0x12
+        PICK_DATA()
+        CONTINUE()
+    op_push19:
+        0x13
+        PICK_DATA()
+        CONTINUE()
+    op_push20:
+        0x14
+        PICK_DATA()
+        CONTINUE()
+    op_push21:
+        0x15
+        PICK_DATA()
+        CONTINUE()
+    op_push22:
+        0x16
+        PICK_DATA()
+        CONTINUE()
+    op_push23:
+        0x17
+        PICK_DATA()
+        CONTINUE()
+    op_push24:
+        0x18
+        PICK_DATA()
+        CONTINUE()
+    op_push25:
+        0x19
+        PICK_DATA()
+        CONTINUE()
+    op_push26:
+        0x1a
+        PICK_DATA()
+        CONTINUE()
+    op_push27:
+        0x1b
+        PICK_DATA()
+        CONTINUE()
+    op_push28:
+        0x1c
+        PICK_DATA()
+        CONTINUE()
+    op_push29:
+        0x1d
+        PICK_DATA()
+        CONTINUE()
+    op_push30:
+        0x1e
+        PICK_DATA()
+        CONTINUE()
+    op_push31:
+        0x1f
+        PICK_DATA()
+        CONTINUE()
+    op_push32:
+        0x20
+        PICK_DATA()
         // // console.log('push')
         // 0x7075736800000000000000000000000000000000000000000000000000000000
         // 0x0000000000000000000000000000000000000000000000000000000000000004
         // CONSOLE_LOG()
         // CONSOLE_LOG_UINT()
-
         CONTINUE()
-
     op_dup1:
-        pop //  => [] dont need the opcode
         dup1
         CONTINUE()
     op_dup2:
-        pop //  => [] dont need the opcode
         dup2
         CONTINUE()
     op_dup3:
-        pop //  => [] dont need the opcode
         dup3
         CONTINUE()
     op_dup4:
-        pop //  => [] dont need the opcode
         dup4
         CONTINUE()
     op_dup5:
-        pop //  => [] dont need the opcode
         dup5
         CONTINUE()
     op_dup6:
-        pop //  => [] dont need the opcode
         dup6
         CONTINUE()
     op_dup7:
-        pop //  => [] dont need the opcode
         dup7
         CONTINUE()
     op_dup8:
-        pop //  => [] dont need the opcode
         dup8
         CONTINUE()
     op_dup9:
-        pop //  => [] dont need the opcode
         dup9
         CONTINUE()
     op_dup10:
-        pop //  => [] dont need the opcode
         dup10
         CONTINUE()
     op_dup11:
-        pop //  => [] dont need the opcode
         dup11
         CONTINUE()
     op_dup12:
-        pop //  => [] dont need the opcode
         dup12
         CONTINUE()
     op_dup13:
-        pop //  => [] dont need the opcode
         dup13
         CONTINUE()
     op_dup14:
-        pop //  => [] dont need the opcode
         dup14
         CONTINUE()
     op_dup15:
-        pop //  => [] dont need the opcode
         dup15
         CONTINUE()
     op_dup16:
-        pop //  => [] dont need the opcode
         dup16
         CONTINUE()
     op_swap1:
-        pop //  => [] dont need the opcode
         swap1
         CONTINUE()
     op_swap2:
-        pop //  => [] dont need the opcode
         swap2
         CONTINUE()
     op_swap3:
-        pop //  => [] dont need the opcode
         swap3
         CONTINUE()
     op_swap4:
-        pop //  => [] dont need the opcode
         swap4
         CONTINUE()
     op_swap5:
-        pop //  => [] dont need the opcode
         swap5
         CONTINUE()
     op_swap6:
-        pop //  => [] dont need the opcode
         swap6
         CONTINUE()
     op_swap7:
-        pop //  => [] dont need the opcode
         swap7
         CONTINUE()
     op_swap8:
-        pop //  => [] dont need the opcode
         swap8
         CONTINUE()
     op_swap9:
-        pop //  => [] dont need the opcode
         swap9
         CONTINUE()
     op_swap10:
-        pop //  => [] dont need the opcode
         swap10
         CONTINUE()
     op_swap11:
-        pop //  => [] dont need the opcode
         swap11
         CONTINUE()
     op_swap12:
-        pop //  => [] dont need the opcode
         swap12
         CONTINUE()
     op_swap13:
-        pop //  => [] dont need the opcode
         swap13
         CONTINUE()
     op_swap14:
-        pop //  => [] dont need the opcode
         swap14
         CONTINUE()
     op_swap15:
-        pop //  => [] dont need the opcode
         swap15
         CONTINUE()
     op_swap16:
-        pop //  => [] dont need the opcode
         swap16
         CONTINUE()
     op_log0:
-        pop //  => [] dont need the opcode
         log0
         CONTINUE()
     op_log1:
-        pop //  => [] dont need the opcode
         log1
         CONTINUE()
     op_log2:
-        pop //  => [] dont need the opcode
         log2
         CONTINUE()
     op_log3:
-        pop //  => [] dont need the opcode
         log3
         CONTINUE()
     op_log4:
-        pop //  => [] dont need the opcode
         log4
         CONTINUE()
     op_create:
         notimplemented jump
     op_call:
-        pop //  => [] dont need the opcode
 
         // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
         // - fix argsOffset
@@ -696,7 +690,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         call
         CONTINUE()
     op_callcode:
-        pop //  => [] dont need the opcode
 
         // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
         // - fix argsOffset
@@ -715,7 +708,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         callcode
         CONTINUE()
     op_return:
-        pop //  => [] dont need the opcode
 
         // fix the memory offset to return
         FIX_MEMOFFSET()
@@ -723,7 +715,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         // execute return
         return
     op_delegatecall:
-        pop //  => [] dont need the opcode
 
         // TODO: we could think about also executing the delegatecall code in NVM, by loading
         //  the target contract code via extcodecopy, and then running a delegatecall to this contract (nvm)
@@ -750,7 +741,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_create2:
         notimplemented jump
     op_staticcall:
-        pop //  => [] dont need the opcode
 
         // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
         // - fix argsOffset
@@ -769,15 +759,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         staticcall
         CONTINUE()
     op_revert:
-        pop //  => [] dont need the opcode
         revert
         CONTINUE()
     op_invalid:
-        pop //  => [] dont need the opcode
         invalid
         CONTINUE()
     selfdestruct:
-        pop //  => [] dont need the opcode
 
         // console.log('selftdestruct not supported')
         0x73656c666465737472756374206e6f7420737570706f72746564000000000000
