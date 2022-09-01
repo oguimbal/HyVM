@@ -1,0 +1,11 @@
+PUSH1 0x1
+DUP1
+
+# Store the 2 stack instructions and return result
+PUSH1 0x0
+MSTORE
+PUSH1 0x20
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

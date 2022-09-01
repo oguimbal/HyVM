@@ -1,0 +1,23 @@
+# See callcodeContract for more info on this call
+
+# Set first slot in the current contract
+PUSH1 0x1
+PUSH1 0x0
+SSTORE
+
+# Callcode contract
+PUSH1 0x0
+PUSH1 0x0
+PUSH1 0x0
+PUSH1 0x0
+PUSH1 0x0
+PUSH20 0x1231231231231231231231231231231231231231
+PUSH2 0xFFFF
+DELEGATECALL
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

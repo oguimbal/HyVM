@@ -1,0 +1,17 @@
+
+# https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic
+GAS
+# 21000 Cost of the transaction
+PUSH3 0x005208
+# PUSH6 0xffffffffffff could simulate GASLIMIT
+GASLIMIT
+SUB
+# Result is the amount of gas used up to and including the GAS instruction
+SUB
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

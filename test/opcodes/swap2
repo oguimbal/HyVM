@@ -1,0 +1,12 @@
+PUSH1 0x3
+PUSH1 0x2
+PUSH1 0x1
+
+SWAP2
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

@@ -1,0 +1,23 @@
+# See callContract for more info on this call
+
+# Set in memory a dummy parameter
+PUSH1 0x1
+PUSH1 0x0
+MSTORE
+
+# Call to callContract with dummy parameter
+PUSH1 0x0
+PUSH1 0x0
+PUSH1 0x20
+PUSH1 0x0
+PUSH1 0x0
+PUSH20 0x1231231231231231231231231231231231231231
+PUSH2 0xFFFF
+CALL
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0xff
+PUSH1 0x00
+RETURN

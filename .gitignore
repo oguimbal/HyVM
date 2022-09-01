@@ -22,3 +22,6 @@ flattened.txt
 broadcast
 
 private
+
+# macOS
+.DS_Store
