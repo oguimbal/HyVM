@@ -7,7 +7,7 @@
 
 
 // used to store the result of call checking (1 word)
-#define constant CALLRESULT_MSLOT = 0x20
+#define constant CALLRESULT_MSLOT = 0x220
 
 
 // used to store call checking arguments
@@ -21,24 +21,23 @@
 //      * array len (len 0x20)
 //      * actual data (len 0x140)
 //  - isTruncated (0x20 length packed)
-// sum = 4 + 0x20 x 6 + 0x140 = 0x204 length , starting at 0x40
-#define constant CALLARGS_MSLOT = 0x40
+// sum = 4 + 0x20 x 6 + 0x140 = 0x204 length , starting at 0x220
+#define constant CALLARGS_MSLOT = 0x240 // CALLRESULT_MSLOT + 0x20 (result size)
 // details:
 #define constant CALLARGS_MAX_DATALEN = 0x140
 #define constant CALLARGS_TOTALLEN = 0x204
 
-#define constant CALLARGS_MSLOT_selector = 0x40
-#define constant CALLARGS_MSLOT_opcode = 0x44
-#define constant CALLARGS_MSLOT_opcode = 0x44
-#define constant CALLARGS_MSLOT_contract = 0x64 // +0x20
-#define constant CALLARGS_MSLOT_value = 0x84 // +0x20
-#define constant CALLARGS_MSLOT_calldata = 0xA4 // +0x20
-#define constant CALLARGS_MSLOT_isTruncated = 0xC4 // +0x20
-#define constant CALLARGS_MSLOT_calldata_len = 0xE4 // +0x20
-#define constant CALLARGS_MSLOT_calldata_raw = 0x104 // +0x20
+#define constant CALLARGS_MSLOT_selector = 0x240 // same as callargs_mslot
+#define constant CALLARGS_MSLOT_opcode = 0x244 // selector + 0x4 (selector size)
+#define constant CALLARGS_MSLOT_contract = 0x264 // +0x20
+#define constant CALLARGS_MSLOT_value = 0x284 // +0x20
+#define constant CALLARGS_MSLOT_calldata = 0x2A4 // +0x20
+#define constant CALLARGS_MSLOT_isTruncated = 0x2C4 // +0x20
+#define constant CALLARGS_MSLOT_calldata_len = 0x2E4 // +0x20
+#define constant CALLARGS_MSLOT_calldata_raw = 0x304 // +0x20
 
-// jump table will be located at 0x20, after the execution pointer
-#define constant OPCODES_JUMPTABLE_MSLOT = 0x260 // 0x40 + 0x204, rounded to upper 20  (= CALLARGS_MSLOT + CALLARGS_TOTALLEN = CALLARGS_MSLOT_calldata_raw + CALLARGS_MAX_DATALEN)
+// this marks the end of memory space used by the contract verifier
+#define constant HOST_MEMORY_START = 0x460 // +0x40, rounded to upper 20  (= CALLARGS_MSLOT + CALLARGS_TOTALLEN = CALLARGS_MSLOT_calldata_raw + CALLARGS_MAX_DATALEN)
 
 
 

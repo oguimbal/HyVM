@@ -9,7 +9,7 @@
 
 // will store the pointer at mem 0, and correct all memory writes
 #define constant EXEC_POINTER_MSLOT = 0x0
-
+#define constant JUMPTABLE_MSLOT = 0x20
 
 /* Generated at: https://www.evm.codes/
     const byId = new Map([...document.getElementsByTagName('tbody')[0].children].map(c => {
@@ -41,7 +41,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 }
 
 #define macro INIT_JUMPTABLE() = takes(0) returns(0) {
-    __tablesize(OPCODES_JUMPTABLE) __tablestart(OPCODES_JUMPTABLE) [OPCODES_JUMPTABLE_MSLOT] codecopy
+    __tablesize(OPCODES_JUMPTABLE) __tablestart(OPCODES_JUMPTABLE) [JUMPTABLE_MSLOT] codecopy
 }
 
 #define macro JUMPTABLE_LOCATION() = takes(1) returns (1) {
@@ -52,7 +52,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
             0xF4 JUMPTABLE_LOCATION() CONSOLE_LOG_UINT() pop // log the resolved location of the corresponding instruction
 
             // log the full jumptable
-            [OPCODES_JUMPTABLE_MSLOT]
+            [JUMPTABLE_MSLOT]
             0x00 add dup1 mload CONSOLE_LOG_UINT() pop
             0x20 add dup1 mload CONSOLE_LOG_UINT() pop
             0x20 add dup1 mload CONSOLE_LOG_UINT() pop
@@ -75,7 +75,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
     // 2 bytes per instruction (jumptable_packed)
     0x2 mul
-    [OPCODES_JUMPTABLE_MSLOT] add // => [memory location in jumptable]
+    [JUMPTABLE_MSLOT] add // => [memory location in jumptable]
     mload // => [code location]
 
     // only get the first two bytes
@@ -92,10 +92,17 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
 // top stack item is a memory location: adjust the top stack item to prevent writing exec pointer.
 #define macro FIX_MEMOFFSET() = takes (1) returns (1) {
-    // offsets all memory instructions to locate them at the end of the jump table
+    // offsets all memory instructions to locate them at the start of memory allocated to host
     // => everything before will be owned by the VM, and innaccessible by the host.
-    [OPCODES_JUMPTABLE_MSLOT] add
-    __tablesize(OPCODES_JUMPTABLE) add
+    [HOST_MEMORY_START] add
+}
+
+// load the opcode corresponding to the execution pointer on stack
+#define macro LOAD_OPCODE() = takes(1) returns (1) {
+    calldataload // => [256 bits of code starting at execution pointer, ptr]
+
+    // extract opcode from leftmost byte   => [opcode, ptr]
+    0xF8 shr // F8 = 248 = 256 - 8
 }
 
 
@@ -104,10 +111,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 #define macro GOTO_AND_ADVANCE() = takes (1) returns (1) {
 
     dup1 // => [ptr, ptr]
-    calldataload // => [256 bits of code starting at execution pointer, ptr]
-
-    // extract opcode from leftmost byte   => [opcode, ptr]
-    0xF8 shr // F8 = 248 = 256 - 8
+    LOAD_OPCODE() // => [opcode, ptr]
 
     // increment the exec pointer to the next byte
     //  ... equivalent to INCREMENT_EXEC_PTR(), but avoids an mload.
@@ -139,6 +143,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
 // start program
 #define macro MAIN() = takes(0) returns (0) {
+
+
+    // init memory by storing a word just before the host memory start
+    // so msize will return 0
+    0x0 0x20 [HOST_MEMORY_START] sub mstore
 
     INIT_JUMPTABLE()
     CONTINUE()
@@ -255,7 +264,8 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         // getting calldata is not supported in a vm => load a 0
 
-        0x00
+        pop //  remove the index to load (we dont care)
+        0x00 // push 0 as the loaded value
 
         CONTINUE()
 
@@ -268,12 +278,15 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_calldatacopy:
 
         // getting calldata is not supported in a vm
-        // => copy zeros (by running calldatacopy with an index which is after the current calldata)
+        //  -> copy zeros (by running calldatacopy with an index which is after the current calldata)
 
-        swap1
-        calldatasize
-        add
-        swap1
+        //  => [destOffset, offest, size]
+        swap1 // => [offest, destOffset, size]
+        pop // => [destOffset, size]
+        FIX_MEMOFFSET() // => [fixed destOffset, size]
+        calldatasize // => [calldataSize, destOffset, size]
+        swap1//   => [destOffset, calldataSize, size]
+
         calldatacopy
 
         CONTINUE()
@@ -373,27 +386,33 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         sstore
         CONTINUE()
     op_jump:
+        // [jumpTo]
+        // move pointer to location
+        GOTO_AND_ADVANCE() // => [opcode]
 
-        op_jump_impl:
-            // move pointer to location
-            GOTO_AND_ADVANCE() // => [opcode]
+        // check that the current opcode is a jumpdest
+        0x5B eq iszero op_jump_fail jumpi
 
-            // check that the current opcode is a jumpdest
-            0x5B eq iszero op_jump_fail jumpi
+        CONTINUE()
 
-            CONTINUE()
+        op_jump_fail:
+            // console.log('expecting JUMPDEST opcode')
+            0x657870656374696e67204a554d5044455354206f70636f646500000000000000
+            0x0000000000000000000000000000000000000000000000000000000000000019
+            CONSOLE_LOG()
 
-            op_jump_fail:
-                // console.log('expecting JUMPDEST opcode')
-                0x657870656374696e67204a554d5044455354206f70636f646500000000000000
-                0x0000000000000000000000000000000000000000000000000000000000000019
-                CONSOLE_LOG()
-                0x00 0x00 revert
+            // console.log(exec pointer)
+            // console.log(opcode)
+            // [EXEC_POINTER_MSLOT] mload CONSOLE_LOG_UINT() // => [exec pointer]
+            // dup1 0x1 swap1 sub LOAD_OPCODE() CONSOLE_LOG_UINT() pop // console.log(opcode @ ptr - 1)
+            // LOAD_OPCODE() CONSOLE_LOG_UINT() pop // => []
+
+            0x00 0x00 revert
 
     op_jumpi:
-
-        swap1 // get the condition on top
-        op_jump_impl jumpi // goto jump if condition is ok
+        // [jumpTo, condition]
+        swap1 // get the condition on top => [condition, jumpTo]
+        op_jump jumpi // goto jump if condition is ok, with [jumpTo] as stack
         CONTINUE() // otherwise, continue
 
     op_pc:
@@ -765,12 +784,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         invalid
         CONTINUE()
     selfdestruct:
-
-        // console.log('selftdestruct not supported')
-        0x73656c666465737472756374206e6f7420737570706f72746564000000000000
-        0x000000000000000000000000000000000000000000000000000000000000001a
-        CONSOLE_LOG()
-
         0x00 0x00 revert
     unused:
         0x756e6b6e6f776e206f70636f64653a0000000000000000000000000000000000

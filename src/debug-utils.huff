@@ -1,6 +1,5 @@
-
-#define constant DEBUG_MEM_SLOT = 0x40 // same CALLARGS_MSLOT
-
+// memory reserved
+#define constant DEBUG_MSLOT = 0x2000
 /**
  logs a small string (must fit in a single 256 bits word)
  usage example to log "hello":
@@ -73,22 +72,22 @@
     // 1) Copy args to memory
     //    - store the "log" signature
     0x41304fac00000000000000000000000000000000000000000000000000000000
-    [DEBUG_MEM_SLOT]
+    [DEBUG_MSLOT]
     mstore
     //    - store the "0x20" offset
     0x20
-    [DEBUG_MEM_SLOT]
+    [DEBUG_MSLOT]
     0x4 add // 4 is the signature size
     mstore
     //    - store string length at 0x20
     // length is already pushed by caller on the stack... ex: 0x5
-    [DEBUG_MEM_SLOT]
+    [DEBUG_MSLOT]
     0x20 add
     0x4 add
     mstore
     //    - store data at 0x40
     // data is already pushed by caller on the stack... ex: 0x68656c6c6f000000000000000000000000000000000000000000000000000000
-    [DEBUG_MEM_SLOT]
+    [DEBUG_MSLOT]
     0x40 add
     0x4 add
     mstore
@@ -98,7 +97,7 @@
     0x0
     0x0
     0x100 // payload size
-    [DEBUG_MEM_SLOT] // payload start
+    [DEBUG_MSLOT] // payload start
     0x000000000000000000636F6e736F6c652e6c6f67 // console address
     gas
     staticcall
@@ -108,7 +107,7 @@
 
 
 /** Logs the top stack element */
-#define macro CONSOLE_LOG_UINT() = takes(0) returns (0) {
+#define macro CONSOLE_LOG_UINT() = takes(1) returns (1) {
     // see implementation of foundry console.log(uint)
     //  at https://github.com/foundry-rs/foundry/blob/master/testdata/logs/console.sol
     // ________________________________________________________________
@@ -119,24 +118,23 @@
 
     //  => We're gonna replicate this behaviour here:
 
-    dup1 // replicate the top stack
+    dup1 // replicate the top stack => [val]
 
     // 1) Copy args to memory
     //    - store the "log" signature
     0xf5b1bba900000000000000000000000000000000000000000000000000000000
-    [DEBUG_MEM_SLOT]
+    [DEBUG_MSLOT]
     mstore
     //    - store the value
     // value is already pushed by caller on the stack: ex: 0x2a
-    [DEBUG_MEM_SLOT]
-    0x4 add // 4 is the signature size
-    mstore
+    [DEBUG_MSLOT] 0x4 add // 4 is the signature size
+    mstore // => []
 
     // 2) Perform the call
     0x0
     0x0
     0x24 // payload size
-    [DEBUG_MEM_SLOT] // payload start
+    [DEBUG_MSLOT] // payload start
     0x000000000000000000636F6e736F6c652e6c6f67 // console address
     gas
     staticcall
@@ -202,9 +200,9 @@
         after:
         dup3  //  => [i,  char 0-F, x, i]
         shl  //  => [char 0-F shifted, x, i]
-        [DEBUG_MEM_SLOT] mload  //  => [str, char 0-F shifted, x, i]
+        [DEBUG_MSLOT] mload  //  => [str, char 0-F shifted, x, i]
         or  //  => [new str, x, i]
-        [DEBUG_MEM_SLOT] mstore//  => [x, i]
+        [DEBUG_MSLOT] mstore//  => [x, i]
 
         // increment counter
         swap1

@@ -62,16 +62,16 @@ contract MyTokenTest is Test {
     }
 
 
-    function testContractVerifierKO() public {
-        setVerifier(new VerifyOnlyCallsTo(address(this)));
-        (bool success, ) = performTransfer();
+    // function testContractVerifierKO() public {
+    //     setVerifier(new VerifyOnlyCallsTo(address(this)));
+    //     (bool success, ) = performTransfer();
 
-        assertEq(success, false); // expecting revert
+    //     assertEq(success, false); // expecting revert
 
-        // check that balances have failed to update
-        assertEq(myToken.balanceOf(user), 0);
-        assertEq(myToken.balanceOf(owner), balance);
-    }
+    //     // check that balances have failed to update
+    //     assertEq(myToken.balanceOf(user), 0);
+    //     assertEq(myToken.balanceOf(owner), balance);
+    // }
 
 
     function testBalanceOfVerifierOK() public {
@@ -86,16 +86,16 @@ contract MyTokenTest is Test {
     }
 
 
-    function testBalanceOfVerifierKO() public {
-        setVerifier(new OnlyAllowExchengesWith(user));
-        (bool success, ) = performTransfer();
+    // function testBalanceOfVerifierKO() public {
+    //     setVerifier(new OnlyAllowExchengesWith(user));
+    //     (bool success, ) = performTransfer();
 
-        assertEq(success, false); // expecting revert
+    //     assertEq(success, false); // expecting revert
 
-        // check that balances have failed to update
-        assertEq(myToken.balanceOf(user), 0);
-        assertEq(myToken.balanceOf(owner), balance);
-    }
+    //     // check that balances have failed to update
+    //     assertEq(myToken.balanceOf(user), 0);
+    //     assertEq(myToken.balanceOf(owner), balance);
+    // }
 
     function performTransfer() public returns (bool success, bytes memory result) {
 
