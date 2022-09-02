@@ -381,20 +381,56 @@ contract OpcodesTest is Test {
         assertEq(result, 0xFFFFFFFFFFFFFFFFFFFFFFFF);
     }
 
-    function testOrigin() public {
+    function testOrigin_delegatecall() public {
         // bytecode generated using: easm test/opcodes/origin
         (bool success, bytes memory data) = nvm.delegatecall(hex"3260005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
+        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
         assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
     }
 
-    function testCaller() public {
+    function testOrigin_call() public {
+        // bytecode generated using: easm test/opcodes/origin
+        (bool success, bytes memory data) = nvm.call(hex"3260005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
+        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+    }
+
+    function testOrigin_staticcall() public {
+        // bytecode generated using: easm test/opcodes/origin
+        (bool success, bytes memory data) = nvm.staticcall(hex"3260005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
+        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+    }
+
+    function testCaller_delegatecall() public {
         // bytecode generated using: easm test/opcodes/caller
         (bool success, bytes memory data) = nvm.delegatecall(hex"3360005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
+        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
         assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+    }
+
+    function testCaller_call() public {
+        // bytecode generated using: easm test/opcodes/caller
+        (bool success, bytes memory data) = nvm.call(hex"3360005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        assertEq(result, address(this));
+    }
+
+    function testCaller_staticcall() public {
+        // bytecode generated using: easm test/opcodes/caller
+        (bool success, bytes memory data) = nvm.staticcall(hex"3360005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        assertEq(result, address(this));
     }
 
     function testCallvalue() public {
