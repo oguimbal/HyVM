@@ -784,6 +784,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         invalid
         CONTINUE()
     selfdestruct:
+        // SELFDESTRUCT is not supported by NVM, for obvious reasons...
         0x00 0x00 revert
     unused:
         0x756e6b6e6f776e206f70636f64653a0000000000000000000000000000000000

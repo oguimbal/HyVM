@@ -1,5 +1,5 @@
 // memory reserved
-#define constant DEBUG_MSLOT = 0x2000
+#define constant DEBUG_MSLOT = 0x220
 /**
  logs a small string (must fit in a single 256 bits word)
  usage example to log "hello":

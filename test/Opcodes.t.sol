@@ -348,12 +348,28 @@ contract OpcodesTest is Test {
     }
 
 
-    function testAddress() public {
+    function testAddress_delegatecall() public {
         // bytecode generated using: easm test/opcodes/address
         (bool success, bytes memory data) = nvm.delegatecall(hex"3060005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
         assertEq(result, address(this));
+    }
+
+    function testAddress_call() public {
+        // bytecode generated using: easm test/opcodes/address
+        (bool success, bytes memory data) = nvm.call(hex"3060005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        assertEq(result, nvm);
+    }
+
+    function testAddress_staticcall() public {
+        // bytecode generated using: easm test/opcodes/address
+        (bool success, bytes memory data) = nvm.staticcall(hex"3060005260ff6000f3");
+        assertEq(success, true);
+        address result = abi.decode(data, (address));
+        assertEq(result, nvm);
     }
 
 
