@@ -22,6 +22,11 @@ jobs:
         with:
           version: nightly
 
+      - name: Install Solidity compiler
+        uses: pontem-network/get-solc@master
+        with:
+          version: v0.8.15
+
       - name: Create env file
         run: |
           cat << EOF >> .env
