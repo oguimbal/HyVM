@@ -442,6 +442,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         // [jumpTo, condition]
         swap1 // get the condition on top => [condition, jumpTo]
         op_jump jumpi // goto jump if condition is ok, with [jumpTo] as stack
+        pop // remove [jumpTo] from stack
         CONTINUE() // otherwise, continue
 
     op_pc:
