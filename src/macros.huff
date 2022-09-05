@@ -18,24 +18,25 @@
 
 // pushes data that has the given size
 #define macro PICK_DATA() = takes(1) returns (1) {
-    dup1 // duplicate num of bytes // => [n, n]
+    // get 256 bits at execution pointer
+    [EXEC_POINTER_MSLOT] mload  // => [execPtr, n]
+    dup1   // => [execPtr, execPtr, n]
+    calldataload // => [256 bits of code, execPtr, n]
+
+    dup3 // duplicate num of bytes => [n, code, execPtr, n]
 
     // will be shifted by: (32 - n)
-    0x20 // => [0x20, n, n]
-    sub //  => [shiftBy, n]
-
-    // get 256 bits at execution pointer
-    [EXEC_POINTER_MSLOT] mload  // => [exec ptr, shiftBy, n]
-    calldataload // => [256 bits of code, shiftBy, n]
+    0x20 // => [0x20, n, code, execPtr, n]
+    sub //  => [shiftBy in Bytes, code, execPtr, n]
+    0x8 mul // => [shiftBy, code, execPtr, n]
 
     // truncate it
-    swap1 // => [shiftBy, code, n]
-    0x8 mul
-    shr //  => [ret, n]
+    shr //  => [ret, execPtr, n]
 
     // increment pointer
-    swap1 // => [n, ret]
-    INCREMENT_EXEC_PTR_N() // => [ret]
+    swap2 // => [execPtr, n, ret]
+    add // => [newExecPtr, ret]
+    [EXEC_POINTER_MSLOT] mstore // => [ret]
 }
 
 /**

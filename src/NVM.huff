@@ -243,6 +243,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         sar
         CONTINUE()
     op_sha3:
+        // [offset, size]
+
+        // fix offset
+        FIX_MEMOFFSET()
+
         sha3
         CONTINUE()
     op_address:
@@ -276,16 +281,21 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_calldatacopy:
+        // [destOffset, offest, size]
+
+        // fix destOffset
+        FIX_MEMOFFSET() // =>  [fixed destOffset, calldataSize, size]
 
         // getting calldata is not supported in a vm
         //  -> copy zeros (by running calldatacopy with an index which is after the current calldata)
 
-        //  => [destOffset, offest, size]
+        // fix offset to make it out of bounds
         swap1 // => [offest, destOffset, size]
-        pop // => [destOffset, size]
-        FIX_MEMOFFSET() // => [fixed destOffset, size]
+        pop //  [destOffset, size]
         calldatasize // => [calldataSize, destOffset, size]
         swap1//   => [destOffset, calldataSize, size]
+
+
 
         calldatacopy
 
@@ -293,15 +303,22 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
     op_codesize:
 
-        // code size is the same as calldata size
+        // when using NVM, the code resides in calldata
+        //  => code size is the same as calldata size
         calldatasize
 
         CONTINUE()
 
     op_codecopy:
 
-        // codecopy is the same as calldatacopy
-        calldatasize
+        // [destOffset, offset, size]
+
+        // fix destOffset
+        FIX_MEMOFFSET()
+
+        // when using NVM, the code resides in calldata
+        //  => codecopy is a really a calldatacopy
+        calldatacopy
 
         CONTINUE()
 
@@ -312,12 +329,24 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         extcodesize
         CONTINUE()
     op_extcodecopy:
+        // [address, destOffset, offset, size]
+
+        // fix destOffset
+        swap1
+        FIX_MEMOFFSET()
+        swap1
+
         extcodecopy
         CONTINUE()
     op_returndatasize:
         returndatasize
         CONTINUE()
     op_returndatacopy:
+        // [destOffset, offset, size]
+
+        // fix destOffset
+        FIX_MEMOFFSET()
+
         returndatacopy
         CONTINUE()
     op_extcodehash:
@@ -568,6 +597,8 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         PICK_DATA()
         CONTINUE()
     op_push32:
+        // [EXEC_POINTER_MSLOT] mload calldataload
+        // 0x20 INCREMENT_EXEC_PTR_N()
         0x20
         PICK_DATA()
         // // console.log('push')
@@ -673,18 +704,23 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         swap16
         CONTINUE()
     op_log0:
+        FIX_MEMOFFSET()
         log0
         CONTINUE()
     op_log1:
+        FIX_MEMOFFSET()
         log1
         CONTINUE()
     op_log2:
+        FIX_MEMOFFSET()
         log2
         CONTINUE()
     op_log3:
+        FIX_MEMOFFSET()
         log3
         CONTINUE()
     op_log4:
+        FIX_MEMOFFSET()
         log4
         CONTINUE()
     op_create:
@@ -778,6 +814,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         staticcall
         CONTINUE()
     op_revert:
+        FIX_MEMOFFSET()
         revert
         CONTINUE()
     op_invalid:

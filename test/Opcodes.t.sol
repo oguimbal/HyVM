@@ -343,8 +343,7 @@ contract OpcodesTest is Test {
         (bool success, bytes memory data) = nvm.delegatecall(hex"7fffffffff00000000000000000000000000000000000000000000000000000000600052600460002060005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
-        // weird... the playground does not return this hash (but this is a hash)
-        assertEq(result, 105345537983141833900523177836038591426164988092870088428104961074093597336652);
+        assertEq(result, 0x29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238);
     }
 
 
