@@ -1,0 +1,117 @@
+
+#define constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+#define constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F
+#define constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+#define constant uniswapRouter = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+#define constant amountUSDC = 0x5F5E100 //0x100_000_000
+
+#define constant ethBalanceBefore = 0x200
+#define constant ethafter = 0x220
+#define constant daiBefore = 0x240
+
+#define macro MAIN() = takes(0) returns (0) {
+    // uint256 balance = IERC20(USDC).balanceOf(address(this));
+    0x70a0823100000000000000000000000000000000000000000000000000000000 0x0 mstore // balanceOf() sig
+    address 0x4 mstore // address(this)
+    0x20 0x0 0x24 0x0 [USDC] gas staticcall
+
+    // require(balance >= amountUSDC, 'Not enough $');
+    // check result
+    iszero
+    [amountUSDC] 0x0 mload lt
+    or fastfail jumpi
+
+
+    // === IERC20(USDC).approve(address(uniswapRouter), type(uint256).max);
+    0x095ea7b300000000000000000000000000000000000000000000000000000000 0x0 mstore // approve() sig
+    [uniswapRouter] 0x4 mstore // uniswap
+    0x5F5E100 0x24 mstore // amount
+    // call
+    0x20 0x0 0x44 0x0 0x0 [USDC] gas call
+
+    // check result
+    iszero fastfail jumpi
+
+    // uint256 ethBalanceBefore = address(this).balance;
+    selfbalance [ethBalanceBefore] mstore
+
+    // ===
+    // address[] memory path = new address[](2);
+    // path[0] = USDC;
+    // path[1] = WETH;
+    // uniswapRouter.swapExactTokensForETH(amountUSDC, 0, path, address(this), block.timestamp);
+
+    // store array
+    0x2 0xa4 mstore // array len
+    [USDC] 0xc4 mstore
+    [WETH] 0xe4 mstore
+    // store args
+    0x18cbafe500000000000000000000000000000000000000000000000000000000 0x0 mstore // swapExactTokensForETH() sig
+    [amountUSDC] 0x4 mstore // amt
+    0x0 0x24 mstore // 0
+    0xa0 0x44 mstore // path
+    address 0x64 mstore // address(this)
+    timestamp 0xfffffff add 0x84 mstore // block.timestamp
+    // call
+    0x0 0x0 0x104 0x0 0x0 [uniswapRouter] gas call
+
+    // check result
+    iszero fastfail jumpi
+
+    // uint256 ethafter = address(this).balance - ethBalanceBefore;
+    [ethBalanceBefore] mload
+    selfbalance sub [ethafter] mstore
+
+    // uint256 daiBefore = IERC20(DAI).balanceOf(address(this));
+    0x70a0823100000000000000000000000000000000000000000000000000000000 0x0 mstore // balanceOf() sig
+    address 0x4 mstore // address(this)
+    [daiBefore] 0x0 0x24 0x0 [DAI] gas staticcall
+
+    // check result
+    iszero fastfail jumpi
+
+    // ===
+    // path[0] = WETH;
+    // path[1] = DAI;
+    // uniswapRouter.swapExactETHForTokens{value: ethafter}(0, path, address(this), block.timestamp);
+
+    // store array
+    0x2 0x84 mstore // array len
+    [WETH] 0xa4 mstore
+    [DAI] 0xc4 mstore
+    // store args
+    0x7ff36ab500000000000000000000000000000000000000000000000000000000 0x0 mstore // swapExactETHForTokens() sig
+    0x0 0x4 mstore
+    0x80 0x24 mstore // path
+    address 0x44 mstore // address(this)
+    timestamp 0xfffffff add 0x64 mstore // block.timestamp
+    // call
+    0x0 0x0 0xe4 0x0
+    [ethafter] mload  // value
+    [uniswapRouter] gas call
+
+    // check result
+    iszero fastfail jumpi
+
+    // ===
+    // uint256 daiAfter = IERC20(DAI).balanceOf(address(this)) - daiBefore;
+    // require(daiAfter >= 9800000000000000);
+
+    [daiBefore] mload
+
+    // IERC20(DAI).balanceOf(address(this));
+    0x70a0823100000000000000000000000000000000000000000000000000000000 0x0 mstore // balanceOf() sig
+    address 0x4 mstore // address(this)
+    [daiBefore] 0x0 0x24 0x0 [DAI] gas staticcall
+
+    // check result
+    iszero fastfail jumpi
+
+
+    0x22D10C4ECC8000 0x0 mload sub lt // require(balance-daibefore >= 9800000000000000)
+    fastfail jumpi
+
+    stop
+fastfail:
+    0x0 0x0 revert
+}

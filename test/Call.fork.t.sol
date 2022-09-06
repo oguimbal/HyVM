@@ -12,7 +12,8 @@ import "./calls/DoubleSwap_native.sol";
 import "./calls/CallNvm.sol";
 
 contract DoubleSwapTest is Test {
-    address public nvm;
+    address nvm;
+    address doubleSwapHuff;
     address owner;
     address ZERO_ADDRESS = address(0);
     uint256 balance = 1000 * 1e6;
@@ -30,14 +31,18 @@ contract DoubleSwapTest is Test {
         );
         owner = address(this);
         nvm = HuffDeployer.deploy("NVM");
+        doubleSwapHuff = HuffDeployer.deploy("../test/calls/DoubleSwap");
         doubleSwap = new DoubleSwap();
         callNvm = new CallNvm();
         vm.startPrank(USDC_owner, USDC_owner);
         IERC20(USDC).transfer(address(doubleSwap), 100_000_000);
         IERC20(USDC).transfer(address(callNvm), 100_000_000);
+        IERC20(USDC).transfer(address(this), 100_000_000);
         vm.stopPrank();
         doubleswapNvmBytecode = getBytecode();
     }
+
+    receive() external payable {}
 
     function getBytecode() public returns (bytes memory bytecode) {
         string
@@ -52,11 +57,20 @@ contract DoubleSwapTest is Test {
 
     // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
 
-    function testDoubleSwap_native() public {
+    function testDoubleSwap_native_solidity() public {
         doubleSwap.doubleSwap();
     }
 
-    function testDoubleSwap_nvm() public {
+    function testDoubleSwap_nvm_solidity() public {
         callNvm.callNvm(nvm, doubleswapNvmBytecode);
+    }
+
+    function testDoubleSwap_native_huff() public {
+        (bool success,) = doubleSwapHuff.delegatecall(new bytes(0));
+        assertEq(success, true);
+    }
+
+    function testDoubleSwap_nvm_huff() public {
+        callNvm.callNvm(nvm, doubleSwapHuff.code);
     }
 }
