@@ -11,43 +11,71 @@ import "./calls/IERC20.sol";
 import "./calls/DoubleSwap_native.sol";
 import "./calls/CallNvm.sol";
 
-contract DoubleSwapTest is Test {
+import "./calls/SupplyBorrowMorpho.sol";
+import "./calls/DepositBorrowAave.sol";
+
+import "./Utils.sol";
+import "./Constants.sol";
+
+import "./ILens.sol";
+
+contract CallForkTests is Test {
     address nvm;
     address doubleSwapHuff;
     address owner;
-    address ZERO_ADDRESS = address(0);
     uint256 balance = 1000 * 1e6;
-    address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    address constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address constant USDC_owner = 0x524a464E53208c1f87F6D56119aCb667D042491a;
     DoubleSwap doubleSwap;
     CallNvm callNvm;
     bytes doubleswapNvmBytecode;
+    bytes depositBorrowAaveNvmBytecode;
+    bytes supplyBorrowMorphoNvmBytecode;
+    SupplyBorrowMorpho supplyBorrowMorpho;
+    DepositBorrowAave depositBorrowAave;
+
+    ILendingPool lendingPool = ILendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
+    ILens lens = ILens(0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67);
 
     //  =====   Set up  =====
     function setUp() public {
-        vm.createSelectFork(
-            vm.rpcUrl('eth')
-        );
+        vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
         nvm = HuffDeployer.deploy("NVM");
         doubleSwapHuff = HuffDeployer.deploy("../test/calls/DoubleSwap");
         doubleSwap = new DoubleSwap();
         callNvm = new CallNvm();
-        vm.startPrank(USDC_owner, USDC_owner);
-        IERC20(USDC).transfer(address(doubleSwap), 100_000_000);
-        IERC20(USDC).transfer(address(callNvm), 100_000_000);
-        IERC20(USDC).transfer(address(this), 100_000_000);
-        vm.stopPrank();
-        doubleswapNvmBytecode = getBytecode();
+
+        doubleswapNvmBytecode = getDoubleSwapBytecode();
+        depositBorrowAaveNvmBytecode = getDepositBorrowAaveNvmBytecode();
+        supplyBorrowMorphoNvmBytecode = getSupplyBorrowMorphoNvmBytecode();
+
+        supplyBorrowMorpho = new SupplyBorrowMorpho();
+        depositBorrowAave = new DepositBorrowAave();
     }
 
     receive() external payable {}
 
-    function getBytecode() public returns (bytes memory bytecode) {
+    function getDoubleSwapBytecode() public returns (bytes memory bytecode) {
         string
             memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DoubleSwap_nvm.sol | head -4 | tail -1)';
+        return executeBashCommand(bashCommand);
+    }
 
+    function getDepositBorrowAaveNvmBytecode() public returns (bytes memory) {
+        string
+            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DepositBorrowAave.sol | head -4 | tail -1 | cut -c 65-)';
+        return executeBashCommand(bashCommand);
+    }
+
+    function getSupplyBorrowMorphoNvmBytecode() public returns (bytes memory) {
+        string
+            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/SupplyBorrowMorpho.sol | tail -1 | cut -c 65-)';
+        return executeBashCommand(bashCommand);
+    }
+
+    function executeBashCommand(string memory bashCommand)
+        public
+        returns (bytes memory bytecode)
+    {
         string[] memory inputs = new string[](3);
         inputs[0] = "bash";
         inputs[1] = "-c";
@@ -58,19 +86,94 @@ contract DoubleSwapTest is Test {
     // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
 
     function testDoubleSwap_native_solidity() public {
+        deal(USDC, address(doubleSwap), 100_000_000 * 10**6);
         doubleSwap.doubleSwap();
     }
 
     function testDoubleSwap_nvm_solidity() public {
+        deal(USDC, address(callNvm), 100_000_000 * 10**6);
         callNvm.callNvm(nvm, doubleswapNvmBytecode);
     }
 
     function testDoubleSwap_native_huff() public {
-        (bool success,) = doubleSwapHuff.delegatecall(new bytes(0));
+        deal(USDC, address(this), 100_000_000 * 10**6);
+        (bool success, ) = doubleSwapHuff.delegatecall(new bytes(0));
         assertEq(success, true);
     }
 
     function testDoubleSwap_nvm_huff() public {
+        deal(USDC, address(callNvm), 100_000_000 * 10**6);
         callNvm.callNvm(nvm, doubleSwapHuff.code);
+    }
+
+    function testDepositBorrowAaveNvm() public {
+        deal(USDC, address(callNvm), 100_000_000 * 10**6);
+        (uint256 totalCollateralETH, uint256 totalDebtETH, uint256 availableBorrowsETH, uint256 currentLiquidationThreshold, uint256 ltv,) = lendingPool.getUserAccountData(address(depositBorrowAave));
+        assertEq(totalCollateralETH, 0);
+        assertEq(totalDebtETH, 0);
+        assertEq(currentLiquidationThreshold, 0);
+        assertEq(ltv, 0);
+        // replace "depositBorrowAave" selector and bypass calldata size check
+        bytes memory finalBytecode = Utils
+            .replaceSelectorBypassCalldataSizeCheck(
+                depositBorrowAaveNvmBytecode,
+                hex"d280ed95"
+            );
+        callNvm.callNvm(nvm, finalBytecode);
+        (totalCollateralETH,  totalDebtETH,  availableBorrowsETH,  currentLiquidationThreshold,  ltv, ) = lendingPool.getUserAccountData(address(callNvm));
+        assertEq(totalCollateralETH > 0, true);
+        assertEq(totalDebtETH > 0 , true);
+        assertEq(currentLiquidationThreshold > 0, true);
+        assertEq(ltv > 0, true);
+    }
+
+    function testDepositBorrowAaveNative() public {
+        deal(USDC, address(depositBorrowAave), 100_000_000 * 10**6);
+        (uint256 totalCollateralETH, uint256 totalDebtETH, uint256 availableBorrowsETH, uint256 currentLiquidationThreshold, uint256 ltv,) = lendingPool.getUserAccountData(address(depositBorrowAave));
+        assertEq(totalCollateralETH, 0);
+        assertEq(totalDebtETH, 0);
+        assertEq(currentLiquidationThreshold, 0);
+        assertEq(ltv, 0);
+        depositBorrowAave.depositBorrowAave();
+        (totalCollateralETH,  totalDebtETH,  availableBorrowsETH,  currentLiquidationThreshold, ltv,) = lendingPool.getUserAccountData(address(depositBorrowAave));
+        assertEq(totalCollateralETH > 0, true);
+        assertEq(totalDebtETH > 0 , true);
+        assertEq(currentLiquidationThreshold > 0, true);
+        assertEq(ltv > 0, true);
+    }
+
+    function testSupplyBorrowMorphoNvm() public {
+        deal(DAI, address(callNvm), 100_000_000 * 10**18);
+        // replace "supplyBorrowMorpho" selector and bypass calldata size check
+        address[] memory path = new address[](2);
+        path[0] = USDC;
+        path[1] = DAI;
+        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        assertEq(totalBalanceDAI == 0, true);
+        assertEq(totalBalanceUSDC == 0, true);
+        bytes memory finalBytecode = Utils
+            .replaceSelectorBypassCalldataSizeCheck(
+                supplyBorrowMorphoNvmBytecode,
+                hex"b9ab7b77"
+            );
+        callNvm.callNvm(nvm, finalBytecode);
+        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
+        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        assertEq(totalBalanceDAI == 9999999, true);
+        assertEq(totalBalanceUSDC >  99 * 10**18, true);
+    }
+
+    function testSupplyBorrowMorphoNative() public {
+        deal(DAI, address(supplyBorrowMorpho), 100_000_000 * 10**18);
+        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        assertEq(totalBalanceDAI == 0, true);
+        assertEq(totalBalanceUSDC == 0, true);
+        supplyBorrowMorpho.supplyBorrowMorpho();
+        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(supplyBorrowMorpho));
+        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(supplyBorrowMorpho));
+        assertEq(totalBalanceDAI == 9999999, true);
+        assertEq(totalBalanceUSDC >  99 * 10**18, true);
     }
 }
