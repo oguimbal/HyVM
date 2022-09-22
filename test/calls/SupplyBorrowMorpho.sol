@@ -3,7 +3,7 @@ pragma solidity ^0.8.15;
 
 import "./IERC20.sol";
 import "./IMorpho.sol";
-import "../Constants.sol";
+import "../ConstantsEthereum.sol";
 
 contract SupplyBorrowMorpho {
     IMorpho private constant morpho =

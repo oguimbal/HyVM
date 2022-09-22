@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 import "./IERC20.sol";
 import "./ILendingPool.sol";
-import "../Constants.sol";
+import "../ConstantsEthereum.sol";
 
 contract DepositBorrowAave {
     ILendingPool private constant lendingPool =
