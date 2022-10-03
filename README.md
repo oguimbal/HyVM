@@ -5,7 +5,8 @@
 
 <div align="center">
   <h1>HyVM</h1>
-  <div>👉 See it in action with <a href="https://oguimbal.github.io/hyvm-live-playground/">HyVM live playground</a></div>
+  <h2>...the execution core of <a href="https://nested.fi">nested.fi</a></h2>
+  <div>👉 See it in action with <a href="https://hyvm.nested.fi/">HyVM live playground</a></div>
 </div>
 
 <br>
@@ -88,16 +89,19 @@ As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallet
   <img width="600" alt="image" src="./static/hyvmAsLibrary.png">
 </div>
 
-## Gas consumption
-
-TODO: Gives incations on gas consumption (doubleSwap example)
 
 ## Addresses
 
-TODO: HyVM addresses (when deployed)
-## Getting Started
+Deployed at 0xdb4516887ccd9a593e390f6a43e34494a524a551 on:
 
-TODO: Gives more details to run the project.
+- Ethereum
+- Polygon
+- Arbitrum
+- Avalanche
+- Optimism
+- Goerli
+
+## Getting Started
 
 You will need:
 * [Huff](https://docs.huff.sh/get-started/installing/)
@@ -105,3 +109,12 @@ You will need:
 
 You can find `easm`, the basic EVM assemby compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)
 You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode
+
+
+### How to deploy
+
+Example of how to deploy to Polygon:
+
+```bash
+forge script --private-key XXXXXXXXXXXXX --mnemonic-indexes 4 --chain-id 137 --rpc-url https://polygon-rpc.com --froms 0x945f803f01F443616546d1F31466c0E7ACfF36f7 script/Deploy.s.sol --broadcast --gas-price 40000000000 --gas-limit 9632030 --legacy
+```
