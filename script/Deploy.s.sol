@@ -11,7 +11,7 @@ interface SimpleStore {
 
 contract Deploy is Script {
   function run() public returns (address deployedAddress) {
-        string memory bashCommand = 'cast abi-encode "f(bytes)" $(huffc ./src/NVM.huff --bytecode | head)';
+        string memory bashCommand = 'cast abi-encode "f(bytes)" $(huffc ./src/HyVM.huff --bytecode | head)';
 
         string[] memory inputs = new string[](3);
         inputs[0] = "bash";

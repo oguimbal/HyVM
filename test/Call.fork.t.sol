@@ -9,7 +9,7 @@ import "./CallVerifiers.sol";
 import "./calls/IERC20.sol";
 
 import "./calls/DoubleSwap_native.sol";
-import "./calls/CallNvm.sol";
+import "./calls/CallHyvm.sol";
 
 import "./calls/SupplyBorrowMorpho.sol";
 import "./calls/DepositBorrowAave.sol";
@@ -20,15 +20,15 @@ import "./ConstantsEthereum.sol";
 import "./ILens.sol";
 
 contract CallForkTests is Test {
-    address nvm;
+    address hyvm;
     address doubleSwapHuff;
     address owner;
     uint256 balance = 1000 * 1e6;
     DoubleSwap doubleSwap;
-    CallNvm callNvm;
-    bytes doubleswapNvmBytecode;
-    bytes depositBorrowAaveNvmBytecode;
-    bytes supplyBorrowMorphoNvmBytecode;
+    CallHyvm callHyvm;
+    bytes doubleswapHyvmBytecode;
+    bytes depositBorrowAaveHyvmBytecode;
+    bytes supplyBorrowMorphoHyvmBytecode;
     SupplyBorrowMorpho supplyBorrowMorpho;
     DepositBorrowAave depositBorrowAave;
 
@@ -39,14 +39,14 @@ contract CallForkTests is Test {
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
-        nvm = HuffDeployer.deploy("NVM");
+        hyvm = HuffDeployer.deploy("HyVM");
         doubleSwapHuff = HuffDeployer.deploy("../test/calls/DoubleSwap");
         doubleSwap = new DoubleSwap();
-        callNvm = new CallNvm();
+        callHyvm = new CallHyvm();
 
-        doubleswapNvmBytecode = getDoubleSwapBytecode();
-        depositBorrowAaveNvmBytecode = getDepositBorrowAaveNvmBytecode();
-        supplyBorrowMorphoNvmBytecode = getSupplyBorrowMorphoNvmBytecode();
+        doubleswapHyvmBytecode = getDoubleSwapBytecode();
+        depositBorrowAaveHyvmBytecode = getDepositBorrowAaveHyvmBytecode();
+        supplyBorrowMorphoHyvmBytecode = getSupplyBorrowMorphoHyvmBytecode();
 
         supplyBorrowMorpho = new SupplyBorrowMorpho();
         depositBorrowAave = new DepositBorrowAave();
@@ -56,17 +56,17 @@ contract CallForkTests is Test {
 
     function getDoubleSwapBytecode() public returns (bytes memory bytecode) {
         string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DoubleSwap_nvm.sol | head -4 | tail -1)';
+            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DoubleSwap_hyvm.sol | head -4 | tail -1)';
         return executeBashCommand(bashCommand);
     }
 
-    function getDepositBorrowAaveNvmBytecode() public returns (bytes memory) {
+    function getDepositBorrowAaveHyvmBytecode() public returns (bytes memory) {
         string
             memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DepositBorrowAave.sol | head -4 | tail -1 | cut -c 65-)';
         return executeBashCommand(bashCommand);
     }
 
-    function getSupplyBorrowMorphoNvmBytecode() public returns (bytes memory) {
+    function getSupplyBorrowMorphoHyvmBytecode() public returns (bytes memory) {
         string
             memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/SupplyBorrowMorpho.sol | tail -1 | cut -c 65-)';
         return executeBashCommand(bashCommand);
@@ -90,9 +90,9 @@ contract CallForkTests is Test {
         doubleSwap.doubleSwap();
     }
 
-    function testDoubleSwap_nvm_solidity() public {
-        deal(USDC, address(callNvm), 100_000_000 * 10**6);
-        callNvm.callNvm(nvm, doubleswapNvmBytecode);
+    function testDoubleSwap_hyvm_solidity() public {
+        deal(USDC, address(callHyvm), 100_000_000 * 10**6);
+        callHyvm.callHyvm(hyvm, doubleswapHyvmBytecode);
     }
 
     function testDoubleSwap_native_huff() public {
@@ -101,13 +101,13 @@ contract CallForkTests is Test {
         assertEq(success, true);
     }
 
-    function testDoubleSwap_nvm_huff() public {
-        deal(USDC, address(callNvm), 100_000_000 * 10**6);
-        callNvm.callNvm(nvm, doubleSwapHuff.code);
+    function testDoubleSwap_hyvm_huff() public {
+        deal(USDC, address(callHyvm), 100_000_000 * 10**6);
+        callHyvm.callHyvm(hyvm, doubleSwapHuff.code);
     }
 
-    function testDepositBorrowAaveNvm() public {
-        deal(USDC, address(callNvm), 100_000_000 * 10**6);
+    function testDepositBorrowAaveHyvm() public {
+        deal(USDC, address(callHyvm), 100_000_000 * 10**6);
         (uint256 totalCollateralETH, uint256 totalDebtETH, uint256 availableBorrowsETH, uint256 currentLiquidationThreshold, uint256 ltv,) = lendingPool.getUserAccountData(address(depositBorrowAave));
         assertEq(totalCollateralETH, 0);
         assertEq(totalDebtETH, 0);
@@ -116,11 +116,11 @@ contract CallForkTests is Test {
         // replace "depositBorrowAave" selector and bypass calldata size check
         bytes memory finalBytecode = Utils
             .replaceSelectorBypassCalldataSizeCheck(
-                depositBorrowAaveNvmBytecode,
+                depositBorrowAaveHyvmBytecode,
                 hex"d280ed95"
             );
-        callNvm.callNvm(nvm, finalBytecode);
-        (totalCollateralETH,  totalDebtETH,  availableBorrowsETH,  currentLiquidationThreshold,  ltv, ) = lendingPool.getUserAccountData(address(callNvm));
+        callHyvm.callHyvm(hyvm, finalBytecode);
+        (totalCollateralETH,  totalDebtETH,  availableBorrowsETH,  currentLiquidationThreshold,  ltv, ) = lendingPool.getUserAccountData(address(callHyvm));
         assertEq(totalCollateralETH > 0, true);
         assertEq(totalDebtETH > 0 , true);
         assertEq(currentLiquidationThreshold > 0, true);
@@ -142,32 +142,32 @@ contract CallForkTests is Test {
         assertEq(ltv > 0, true);
     }
 
-    function testSupplyBorrowMorphoNvm() public {
-        deal(DAI, address(callNvm), 100_000_000 * 10**18);
+    function testSupplyBorrowMorphoHyvm() public {
+        deal(DAI, address(callHyvm), 100_000_000 * 10**18);
         // replace "supplyBorrowMorpho" selector and bypass calldata size check
         address[] memory path = new address[](2);
         path[0] = USDC;
         path[1] = DAI;
-        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
-        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
         assertEq(totalBalanceDAI == 0, true);
         assertEq(totalBalanceUSDC == 0, true);
         bytes memory finalBytecode = Utils
             .replaceSelectorBypassCalldataSizeCheck(
-                supplyBorrowMorphoNvmBytecode,
+                supplyBorrowMorphoHyvmBytecode,
                 hex"b9ab7b77"
             );
-        callNvm.callNvm(nvm, finalBytecode);
-        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
-        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        callHyvm.callHyvm(hyvm, finalBytecode);
+        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
+        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
         assertEq(totalBalanceDAI == 9999999, true);
         assertEq(totalBalanceUSDC >  99 * 10**18, true);
     }
 
     function testSupplyBorrowMorphoNative() public {
         deal(DAI, address(supplyBorrowMorpho), 100_000_000 * 10**18);
-        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callNvm));
-        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callNvm));
+        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
         assertEq(totalBalanceDAI == 0, true);
         assertEq(totalBalanceUSDC == 0, true);
         supplyBorrowMorpho.supplyBorrowMorpho();

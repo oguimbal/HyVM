@@ -303,7 +303,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
     op_codesize:
 
-        // when using NVM, the code resides in calldata
+        // when using HyVM, the code resides in calldata
         //  => code size is the same as calldata size
         calldatasize
 
@@ -316,7 +316,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         // fix destOffset
         FIX_MEMOFFSET()
 
-        // when using NVM, the code resides in calldata
+        // when using HyVM, the code resides in calldata
         //  => codecopy is a really a calldatacopy
         calldatacopy
 
@@ -772,8 +772,8 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         return
     op_delegatecall:
 
-        // TODO: we could think about also executing the delegatecall code in NVM, by loading
-        //  the target contract code via extcodecopy, and then running a delegatecall to this contract (nvm)
+        // TODO: we could think about also executing the delegatecall code in HyVM, by loading
+        //  the target contract code via extcodecopy, and then running a delegatecall to this contract (hyvm)
         //  with the target contract's code as calldata, along with the actual calldata
         //   => then, must think about some kind of interface to detect that this is such call,
         //    and modify the calldataload, calldatasize and calldatacopy implementations
@@ -822,7 +822,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         invalid
         CONTINUE()
     selfdestruct:
-        // SELFDESTRUCT is not supported by NVM, for obvious reasons...
+        // SELFDESTRUCT is not supported by HyVM, for obvious reasons...
         0x00 0x00 revert
     unused:
         0x756e6b6e6f776e206f70636f64653a0000000000000000000000000000000000

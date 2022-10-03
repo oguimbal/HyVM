@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "../src/INVMCallVerifier.sol";
+import "../src/IHyVMCallVerifier.sol";
 import "forge-std/console.sol";
 import "./Utils.sol";
 
-contract VerifyAllCalls is INVMCallVerifier {
+contract VerifyAllCalls is IHyVMCallVerifier {
     function verifyCall(
         uint8 opcode,
         address callContract,
@@ -23,7 +23,7 @@ contract VerifyAllCalls is INVMCallVerifier {
     }
 }
 
-contract VerifyOnlyCallsTo is INVMCallVerifier {
+contract VerifyOnlyCallsTo is IHyVMCallVerifier {
     address _onlyContract;
 
     constructor(address onlyContract) {
@@ -47,7 +47,7 @@ contract VerifyOnlyCallsTo is INVMCallVerifier {
     }
 }
 
-contract OnlyAllowExchengesWith is INVMCallVerifier {
+contract OnlyAllowExchengesWith is IHyVMCallVerifier {
     address _user;
 
     constructor(address user) {

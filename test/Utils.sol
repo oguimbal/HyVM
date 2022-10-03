@@ -117,7 +117,7 @@ library Utils {
         return (false, 0);
     }
 
-    function setVerifierBytecode(address nvm, address verifier)
+    function setVerifierBytecode(address hyvm, address verifier)
         public
         returns (bytes memory bytecode)
     {

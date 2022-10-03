@@ -71,20 +71,20 @@ Thus, the actual memory of the host is starting at either 0x340 or 0x460 dependi
 
 ## Why?
 
-Using the NestedVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.  
+Using the NestedVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.
 There is no limit on which interactions that can be created.
-Custom and complex logic with chained calls can be executed by the NestedVM opening a lot possibilities.   
+Custom and complex logic with chained calls can be executed by the NestedVM opening a lot possibilities.
 Repetive intructions and common ones could also be called as helper contract if needed.
 
 ## Example of use
 
 One way to use the NestedVM is to use it as a library called with delegatecall.
-As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallets/smart-contract-wallets/) allows to execute a delegatecall (or several), and thus to call the NVM. The DApp managing the contract wallet gives the bytecode for the NVM to execute. For example :
+As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallets/smart-contract-wallets/) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example :
 * Swap multiple assets.
 * Approve & deposit.
 
 <div align="center">
-  <img width="600" alt="image" src="./static/nvmAsLibrary.png">
+  <img width="600" alt="image" src="./static/hyvmAsLibrary.png">
 </div>
 
 ## Gas consumption
@@ -102,5 +102,5 @@ You will need:
 * [Huff](https://docs.huff.sh/get-started/installing/)
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
-You can find `easm`, the basic EVM assemby compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)  
-You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode 
+You can find `easm`, the basic EVM assemby compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)
+You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode

@@ -3,28 +3,28 @@ pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 import "./Utils.sol";
-import "./calls/CallNvm.sol";
+import "./calls/CallHyvm.sol";
 import "./calls/GMXLong.sol";
 import "./calls/IGMX.sol";
 import "./ConstantsArbitrum.sol";
 
 contract GMXTest is Test {
-    address nvm;
+    address hyvm;
     address doubleSwapHuff;
     address owner;
     uint256 balance = 1000 * 1e6;
-    CallNvm callNvm;
+    CallHyvm callHyvm;
     GMXLong gmxLong;
-    bytes gmxLongNvmBytecode;
+    bytes gmxLongHyvmBytecode;
 
     //  =====   Set up  =====
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("arbi"));
         owner = address(this);
-        nvm = HuffDeployer.deploy("NVM");
-        callNvm = new CallNvm();
+        hyvm = HuffDeployer.deploy("HyVM");
+        callHyvm = new CallHyvm();
         gmxLong = new GMXLong();
-        gmxLongNvmBytecode = type(GMXLong).runtimeCode;
+        gmxLongHyvmBytecode = type(GMXLong).runtimeCode;
     }
 
     receive() external payable {}
@@ -65,7 +65,7 @@ contract GMXTest is Test {
         assertEq(balanceAfter > balanceBefore, true);
     }
 
-    function testGMXLongNvm() public {
+    function testGMXLongHyvm() public {
         // PositionRouter
         IGMXPositionRouter positionRouter = IGMXPositionRouter(
             0x3D6bA331e3D9702C5e8A8d254e5d8a285F223aba
@@ -75,16 +75,16 @@ contract GMXTest is Test {
             0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8
         );
         // Deal USDC and ETH to contract that will open a long position
-        deal(USDC, address(callNvm), 1000000000 * 10**6);
-        deal(address(callNvm), 1000000000 * 10**18);
+        deal(USDC, address(callHyvm), 1000000000 * 10**6);
+        deal(address(callHyvm), 1000000000 * 10**18);
         // replace "gmxLong" selector and bypass calldata size check
         bytes memory finalBytecode = Utils
             .replaceSelectorBypassCalldataSizeCheck(
-                gmxLongNvmBytecode,
+                gmxLongHyvmBytecode,
                 hex"9507c78f"
             );
-        // CallNvm
-        callNvm.callNvm(nvm, finalBytecode);
+        // CallHyvm
+        callHyvm.callHyvm(hyvm, finalBytecode);
         // Keeper that will execute the requests
         address keeper = address(123);
         // balance before for the keeper
@@ -97,7 +97,7 @@ contract GMXTest is Test {
         // The transaction is identified by a requestKey
         changePrank(keeper);
         bytes32 key = positionRouter.getRequestKey(
-            address(callNvm),
+            address(callHyvm),
             uint256(1)
         );
         positionRouter.executeIncreasePosition(key, payable(keeper));

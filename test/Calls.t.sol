@@ -9,7 +9,7 @@ import "./CallVerifiers.sol";
 
 contract MyTokenTest is Test {
     MyToken myToken;
-    address public nvm;
+    address public hyvm;
     address owner;
     address ZERO_ADDRESS = address(0);
     address user = address(0x1231231231231231231231231231231231231231);
@@ -24,7 +24,7 @@ contract MyTokenTest is Test {
         myToken.mint(owner, balance);
 
         // set deploy VM & set verifier contract
-        nvm = HuffDeployer.deploy("NVM");
+        hyvm = HuffDeployer.deploy("HyVM");
     }
 
     // TODO test ownership... once an owner is defined, must not be able to change owner,
@@ -32,9 +32,9 @@ contract MyTokenTest is Test {
     // TODO once there is an owner, someone else cannot change the verifier
     // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
 
-    function setVerifier(INVMCallVerifier verifier) public {
-        bytes memory code = Utils.setVerifierBytecode(nvm, address(verifier));
-        (bool success, ) = nvm.delegatecall(code);
+    function setVerifier(IHyVMCallVerifier verifier) public {
+        bytes memory code = Utils.setVerifierBytecode(hyvm, address(verifier));
+        (bool success, ) = hyvm.delegatecall(code);
         assert(success);
     }
 
@@ -124,6 +124,6 @@ contract MyTokenTest is Test {
 
         // execute
         console.log(" => starting execution");
-        return nvm.delegatecall(bytecode);
+        return hyvm.delegatecall(bytecode);
     }
 }
