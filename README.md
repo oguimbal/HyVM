@@ -37,6 +37,31 @@ According to [vmware](https://www.vmware.com/topics/glossary/content/hypervisor.
 
 In our case, the HyVM allows to run an **EVM on top the EVM** and execute [opcodes](https://www.evm.codes/) directly.
 
+## Why?
+
+Using the HyVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.
+There is no limit on which interactions that can be created.
+Custom and complex logic with chained calls can be executed by the HyVM opening a lot possibilities.
+Repetive intructions and common ones could also be called as helper contract if needed.
+
+## Examples of use
+
+### Static functions / get rid of helpers
+The most straightforward use is for readonly functions... no need to deploy helper contracts to do lots of things !
+
+👉 For instance, see [this gist](https://gist.github.com/oguimbal/3cc74f6234a006fd9685333381679657) which demonstrates how to fetch multiple balances on-chain at once.
+
+### More general use
+
+Another way to use the HyVM is to use it as a library called with delegatecall.
+As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallets/smart-contract-wallets/) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example :
+* Swap multiple assets.
+* Approve & deposit.
+
+<div align="center">
+  <img width="600" alt="image" src="./static/hyvmAsLibrary.png">
+</div>
+
 ## How it works?
 
 ### Calling the HyVM
@@ -76,24 +101,6 @@ The HyVM private memory layout is as follows:
 - `[0x220-0x460]` **(when contract contract verifier is enabled)** 👉 Memory used to store contract verification call args & result. nb: It overlaps debug memory (because we dont need them both at the same time)
 
 Thus, the actual memory of the host is starting at either 0x340 or 0x460 depending on the chosen configuration.
-
-## Why?
-
-Using the HyVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.
-There is no limit on which interactions that can be created.
-Custom and complex logic with chained calls can be executed by the HyVM opening a lot possibilities.
-Repetive intructions and common ones could also be called as helper contract if needed.
-
-## Example of use
-
-One way to use the HyVM is to use it as a library called with delegatecall.
-As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallets/smart-contract-wallets/) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example :
-* Swap multiple assets.
-* Approve & deposit.
-
-<div align="center">
-  <img width="600" alt="image" src="./static/hyvmAsLibrary.png">
-</div>
 
 
 ## Addresses
