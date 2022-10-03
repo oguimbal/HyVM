@@ -12,13 +12,11 @@ import "../calls/IUniswapV2Router01.sol";
 contract LimitSwapsTest is Test {
     address hyvm;
     address owner;
-    address ZERO_ADDRESS = address(0);
-    uint256 balance = 1000 * 1e6;
     address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address constant USDC_owner = 0x524a464E53208c1f87F6D56119aCb667D042491a;
     CallHyvm callHyvm;
-    bytes multiplSwapHyvmBytecode;
+    bytes multipleInlineSwapHyvmBytecode;
+    bytes multipleLoopedSwapHyvmBytecode;
 
     // Labels
     address private constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -35,11 +33,9 @@ contract LimitSwapsTest is Test {
         owner = address(this);
         hyvm = HuffDeployer.deploy("HyVM");
         callHyvm = new CallHyvm();
-        
-        deal(USDC, address(callHyvm), 100_000_000);
-        deal(USDC, address(this), 100_000_000);
 
-        multiplSwapHyvmBytecode = getMultipleSwapBytecode();
+        multipleInlineSwapHyvmBytecode = getMultipleInlineSwapBytecode();
+        multipleLoopedSwapHyvmBytecode = getMultipleLoopedSwapBytecode();
 
         // Debug labels
         vm.label(USDC, "USDC");
@@ -51,9 +47,9 @@ contract LimitSwapsTest is Test {
         vm.label(address(uniswapRouter), "uniswapRouter");
     }
 
-    function getMultipleSwapBytecode() public returns (bytes memory bytecode) {
+    function getMultipleInlineSwapBytecode() public returns (bytes memory bytecode) {
         string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/MultipleSwap_hyvm.sol | head -12 | tail -1)';
+            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/MultipleInlineSwaps_hyvm.sol | head -12 | tail -1)';
 
         string[] memory inputs = new string[](3);
         inputs[0] = "bash";
@@ -62,8 +58,53 @@ contract LimitSwapsTest is Test {
         bytecode = abi.decode(vm.ffi(inputs), (bytes));
     }
 
-    function testMultipleSwaps() public {
-        callHyvm.callHyvm(hyvm, multiplSwapHyvmBytecode);
+    function getMultipleLoopedSwapBytecode() public returns (bytes memory bytecode) {
+        string
+            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/MultipleLoopedSwaps_hyvm.sol | head -12 | tail -1)';
+
+        string[] memory inputs = new string[](3);
+        inputs[0] = "bash";
+        inputs[1] = "-c";
+        inputs[2] = bashCommand;
+        bytecode = abi.decode(vm.ffi(inputs), (bytes));
     }
 
+    function testMultipleInlineSwaps() public {
+        deal(USDC, address(callHyvm), 100_000_000);
+        deal(USDC, address(this), 100_000_000);
+
+        callHyvm.callHyvm(hyvm, multipleInlineSwapHyvmBytecode);
+    }
+
+    
+    function testMultipleLoopedSwaps1() public {
+        deal(USDC, address(callHyvm), type(uint16).max);
+        deal(USDC, address(this), type(uint16).max);
+
+        // Call fail because the uniswap output amount equals 0
+        //     => "INSUFFICIENT_OUTPUT_AMOUNT"
+        //
+        // NOTE: consume 268_920_330 gas
+        vm.expectRevert("Failed to call HyVM");
+        callHyvm.callHyvm(hyvm, multipleLoopedSwapHyvmBytecode);
+    }
+
+    function testMultipleLoopedSwaps2() public {
+        deal(USDC, address(callHyvm), type(uint128).max);
+        deal(USDC, address(this), type(uint128).max);
+
+        // Call fail because we buy all the ETH in the Uniswap pool
+        vm.expectRevert("Failed to call HyVM");
+        callHyvm.callHyvm(hyvm, multipleLoopedSwapHyvmBytecode);
+    }
+
+    function testMultipleLoopedSwaps3() public {
+        deal(USDC, address(callHyvm), type(uint256).max);
+        deal(USDC, address(this), type(uint256).max);
+
+        // Call fail because convert uint256.max USDC for ETH, it thorw a 
+        //     => "ds-math-mul-overflow" during the swap
+        vm.expectRevert("Failed to call HyVM");
+        callHyvm.callHyvm(hyvm, multipleLoopedSwapHyvmBytecode);
+    }
 }
