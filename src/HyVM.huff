@@ -725,7 +725,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         log4
         CONTINUE()
     op_create:
-        notimplemented jump
+        swap1
+        FIX_MEMOFFSET()
+        swap1
+        create
+        CONTINUE()
+
     op_call:
 
         // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
@@ -795,7 +800,12 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         delegatecall
         CONTINUE()
     op_create2:
-        notimplemented jump
+        swap1
+        FIX_MEMOFFSET()
+        swap1
+        create2
+        CONTINUE()
+
     op_staticcall:
 
         // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
