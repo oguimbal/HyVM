@@ -1,7 +1,7 @@
 # creates an exception if first word of calldata is 0
 # Source: https://www.evm.codes/ playground for CALL
 # 0x67600035600757FE5B60005260086018F3
-# you can decompile it with pyevmasm to get
+# you can disassemble it with pyevmasm to get
 # mnemonic creation code and logic (below)
 
 PUSH1 0x0
