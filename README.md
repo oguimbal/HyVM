@@ -1,17 +1,23 @@
 
 <div align="center">
-  <img width="60" alt="logo" src="./static/tmpLogo.png" style="margin-bottom:-30px">
+  <h1>HyVM</h1>
+  <img height="60" alt="logo" src="./static/eth.png">
+  <span style="margin: 10px;">&nbsp;&nbsp;&nbsp;&nbsp;✕&nbsp;&nbsp;&nbsp;&nbsp;</span>
+  <img src="./static/nested.png" height="60" />
 </div>
 
 <div align="center">
-  <h1>HyVM</h1>
-  <h2>...the execution core of <a href="https://nested.fi">nested.fi</a></h2>
-  <div>👉 See it in action with <a href="https://hyvm.nested.fi/">HyVM live playground</a></div>
+  <h3>...the execution core of <a href="https://nested.fi">nested.fi</a></h3>
+  <br>
+  HyVM is an Ethereum Virtual Machine (EVM) Hypervisor written in <a href="https://huff.sh/">Huff</a>, allowing the execution of arbitrary EVM Bytecode.
+  <br>
+  <br>
+  <h3> 👉 See it in action with <a href="https://hyvm.nested.fi/">HyVM live playground</a></h3>
 </div>
 
 <br>
 
-**HyVM is an Ethereum Virtual Machine (EVM) Hypervisor written in [Huff](https://huff.sh/), allowing the execution of arbitrary EVM Bytecode.**
+
 
 ```solidity
 function execute() public returns (uint256 result) {
