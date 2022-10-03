@@ -100,12 +100,12 @@ As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallet
 
 Deployed at 0xdb4516887ccd9a593e390f6a43e34494a524a551 on:
 
-- Ethereum
-- Polygon
-- Arbitrum
-- Avalanche
-- Optimism
-- Goerli
+- [Ethereum](https://etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
+- [Polygon](https://polygonscan.com/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
+- [Arbitrum](https://arbiscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code )
+- [Avalanche](https://snowtrace.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code )
+- [Optimism](https://optimistic.etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
+- [Goerli](https://goerli.etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
 
 ## Getting Started
 
