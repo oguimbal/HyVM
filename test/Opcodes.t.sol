@@ -1131,4 +1131,34 @@ contract OpcodesTest is Test {
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0x0);
     }
+
+    function testCreate() public {
+        // bytecode generated using: easm test/opcodes/create
+        bytes memory bytecode = hex"7067600054600757fe5b60005260086018f36000526011600f6000f060005260ff6000f3";
+        (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
+        assertEq(success, true);
+        // It send us back an address
+        (address result) = abi.decode(data, (address));
+        // Let's verify that the code present is callcodeContract bytecode
+        bytes memory code = result.code;
+        assertEq(code, hex"600054600757fe5b");
+    }
+
+    function testCreate2() public {
+        // bytecode generated using: easm test/opcodes/create2
+        bytes memory cont = hex"7067600054600757fe5b60005260086018f360005260016011600f6000f060005260ff6000f3";
+        // we replace create opcode by create2 as EVM-Assembler does not implement it
+        bytes memory bytecode = Utils.replaceFirstOccurenceBytes(
+            cont,
+            hex"f0",
+            hex"f5"
+        );
+        (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
+        assertEq(success, true);
+        // It send us back an address
+        (address result) = abi.decode(data, (address));
+        // Let's verify that the code present is callcodeContract bytecode
+        bytes memory code = result.code;
+        assertEq(code, hex"600054600757fe5b");
+    }
 }
