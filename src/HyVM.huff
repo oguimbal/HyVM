@@ -377,8 +377,8 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         selfbalance
         CONTINUE()
     op_basefee:
-        // basefee not supported by huff ?!
-        notimplemented jump
+        basefee
+        CONTINUE()
     op_pop:
         pop
         CONTINUE()
