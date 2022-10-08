@@ -105,14 +105,18 @@ Thus, the actual memory of the host is starting at either 0x340 or 0x460 dependi
 
 ## Addresses
 
-Deployed at 0xdb4516887ccd9a593e390f6a43e34494a524a551 on:
+Deployed at `0x36dAc1C6a72F94C13369Db9DAdCBD79ba5425019` on:
 
-- [Ethereum](https://etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
-- [Polygon](https://polygonscan.com/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
-- [Arbitrum](https://arbiscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code )
-- [Avalanche](https://snowtrace.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code )
-- [Optimism](https://optimistic.etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
-- [Goerli](https://goerli.etherscan.io/address/0xdb4516887ccd9a593e390f6a43e34494a524a551#code)
+- [Ethereum](https://etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Polygon](https://polygonscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [BNB Chain](https://bscscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Arbitrum](https://arbiscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code )
+- [Avalanche](https://snowtrace.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code )
+- [Optimism](https://optimistic.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Fantom](https://ftmscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Aurora](https://aurorascan.dev/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Goerli](https://goerli.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Sepolia](https://sepolia.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
 
 ## Getting Started
 
