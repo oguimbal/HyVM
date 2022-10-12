@@ -124,7 +124,7 @@ You will need:
 * [Huff](https://docs.huff.sh/get-started/installing/)
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
-You can find `easm`, the basic EVM assemby compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)
+You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)
 You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode
 
 
