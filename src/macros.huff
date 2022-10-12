@@ -1,4 +1,11 @@
 
+// === define where we'll store VM private things
+
+// will store the pointer at mem 0, and correct all memory writes
+#define constant EXEC_POINTER_MSLOT = 0x0
+
+
+
 // increment the execution pointer location by one byte
 #define macro INCREMENT_EXEC_PTR() = takes(0) returns (0) {
     0x1
@@ -70,4 +77,54 @@ takes: size source target
     memcpy_one jump
     memcpy_end:
     pop pop pop
+}
+
+
+// top stack item is a memory location: adjust the top stack item to prevent writing exec pointer.
+#define macro FIX_MEMOFFSET() = takes (1) returns (1) {
+    // offsets all memory instructions to locate them at the start of memory allocated to host
+    // => everything before will be owned by the VM, and innaccessible by the host.
+    [HOST_MEMORY_START] add
+}
+
+// load the opcode corresponding to the execution pointer on stack
+#define macro LOAD_OPCODE() = takes(1) returns (1) {
+    calldataload // => [256 bits of code starting at execution pointer, ptr]
+
+    // extract opcode from leftmost byte   => [opcode, ptr]
+    0xF8 shr // F8 = 248 = 256 - 8
+}
+
+
+// get the host instruction at given pointer location, and advance pointer by one
+// (nb: this is used both by CONTINUE() and by jump instruction)
+#define macro GOTO_AND_ADVANCE() = takes (1) returns (1) {
+
+    dup1 // => [ptr, ptr]
+    LOAD_OPCODE() // => [opcode, ptr]
+
+    // increment the exec pointer to the next byte
+    //  ... equivalent to INCREMENT_EXEC_PTR(), but avoids an mload.
+    swap1 // => [ptr, opcode]
+    0x1 add// => [new ptr, opcode]
+    [EXEC_POINTER_MSLOT] mstore // => [opcode]
+}
+
+#define macro CONTINUE() = takes(0) returns (1) {
+
+    // load the instruction located at this execution pointer
+    [EXEC_POINTER_MSLOT] mload
+
+    GOTO_AND_ADVANCE() // => [opcode]
+
+
+    // // console.log('opcode:')
+    // 0x6f70636f64653a00000000000000000000000000000000000000000000000000
+    // 0x0000000000000000000000000000000000000000000000000000000000000007
+    // CONSOLE_LOG()
+    // // console.log(opcode)
+    // CONSOLE_LOG_UINT()
+
+    // jump to the operation given on stack
+    JUMP_TO_OPCODE()
 }
