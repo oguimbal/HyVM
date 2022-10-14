@@ -1,0 +1,253 @@
+// SPDX-License-Identifier: Unlicence
+
+/// @title Contract Verifier 
+/// @notice Abstract contract for the HyVM with call/store verifications
+
+/* -------------------------------------------------------------------------- */
+/*                                 CONSTRUCTOR                                */
+/* -------------------------------------------------------------------------- */
+
+#define macro CONSTRUCTOR() = takes(0) returns (0) {
+    // Set msg.sender as the owner
+    caller [OWNER_SSLOT] sstore
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Call verifier storage slot
+#define constant CALL_VERIFIER_SSLOT = 0x58a8a9223af434080477cd2d1a2667aba3ce9f1301007611a4d07a0af708e65a
+
+/// @dev Reentrant storage slot
+#define constant REENTRANT_SSLOT = 0xda8b995e2670b58d57272b2d0b50f8c7de2a7e927b4b9b06444cd9e378d215fb
+
+/// @dev Owner address storage slot.
+///      This will ensure that when called with a regular call (not a delegatecall), 
+///      nobody can take the ownership here. But people will be able to take ownership 
+///      on their own instance because ONLY_OWNER() macro is OK when there is no owner set.
+#define constant OWNER_SSLOT = 0x240bb37aa812ad108aae08a4b01536038aac1692fa2f4eabbc4a8a540d93e0be
+
+/// @dev Memory slot to store the result of call checking (1 word)
+#define constant CALLRESULT_MSLOT = 0x220
+
+/* -------------------------------------------------------------------------- */
+/*                                  CALL ARGS                                 */
+/* -------------------------------------------------------------------------- */
+
+// Used to store call checking arguments.
+// sum = 4 + 0x20 x 6 + 0x140 = 0x204 length , starting at 0x220
+#define constant CALLARGS_MSLOT = 0x240 // CALLRESULT_MSLOT + 0x20 (result size)
+#define constant CALLARGS_MAX_DATALEN = 0x140
+#define constant CALLARGS_TOTALLEN = 0x204
+#define constant CALLARGS_MSLOT_selector = 0x240 // same as callargs_mslot
+#define constant CALLARGS_MSLOT_opcode = 0x244 // selector + 0x4 (selector size)
+#define constant CALLARGS_MSLOT_contract = 0x264 // +0x20
+#define constant CALLARGS_MSLOT_value = 0x284 // +0x20
+#define constant CALLARGS_MSLOT_calldata = 0x2A4 // +0x20
+#define constant CALLARGS_MSLOT_isTruncated = 0x2C4 // +0x20
+#define constant CALLARGS_MSLOT_calldata_len = 0x2E4 // +0x20
+#define constant CALLARGS_MSLOT_calldata_raw = 0x304 // +0x20
+
+/// @dev This marks the end of memory space used by the contract verifier.
+//      +0x40, rounded to upper 20 (= CALLARGS_MSLOT + CALLARGS_TOTALLEN = CALLARGS_MSLOT_calldata_raw + CALLARGS_MAX_DATALEN)
+#define constant HOST_MEMORY_START = 0x460
+
+/* -------------------------------------------------------------------------- */
+/*                                   MACROS                                   */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Check that the pending SSTORE operation is OK
+#define macro CHECK_SSTORE() = takes(0) returns (0) {
+    // The first value on stack is the key to store
+    dup1 [REENTRANT_SSLOT] sload eq
+    dup1 [CALL_VERIFIER_SSLOT] sload eq
+        or
+    dup1 [OWNER_SSLOT] sload eq
+        or
+
+    // Jump to success if those slots are not protected
+    iszero checksstore_success jumpi
+
+    // Check that we're owner (if we are, then we can proceed)
+    ONLY_OWNER()
+
+    checksstore_success:
+}
+
+/// @dev Check that the pending DELEGATECALL operation is OK
+#define macro CHECK_DELEGATECALL() = takes(0) returns (0) {
+        // - check can call
+        dup4 // push argSize => [argSize, gas address argsOffset argsSize retOffset retSize]
+        dup4 // push argOffset => [argOffset, argSize, gas address argsOffset argsSize retOffset retSize]
+        0x0  // push value => [value, argSize, gas address argsOffset argsSize retOffset retSize]
+        dup5 // push contract address => [contact, argSize, gas address argsOffset argsSize retOffset retSize]
+        0xFA // push opcode => [opcode, argSize, gas address argsOffset argsSize retOffset retSize]
+        CHECK_GENERIC_CALL()
+}
+
+/// @dev Check that the pending STATICCALL operation is OK
+#define macro CHECK_STATICCALL() = takes(0) returns (0) {
+        // - check can call
+        dup4 // push argSize => [argSize, gas address argsOffset argsSize retOffset retSize]
+        dup4 // push argOffset => [argOffset, argSize, gas address argsOffset argsSize retOffset retSize]
+        0x0  // push value => [value, argSize, gas address argsOffset argsSize retOffset retSize]
+        dup5 // push contract address => [contact, argSize, gas address argsOffset argsSize retOffset retSize]
+        0xFA // push opcode => [opcode, argSize, gas address argsOffset argsSize retOffset retSize]
+        CHECK_GENERIC_CALL() // => [gas address argsOffset argsSize retOffset retSize]
+}
+
+/// @dev Check that the pending CALLCODE operation is OK
+#define macro CHECK_CALLCODE() = takes(0) returns (0) {
+        // - check can call
+        dup5 // push argSize
+        dup5 // push argOffset
+        dup5 // push value
+        dup5 // push contract address
+        0xF4 // push opcode
+        CHECK_GENERIC_CALL()
+}
+
+/// @dev Check that the pending CALL operation is OK
+#define macro CHECK_CALL() = takes(0) returns (0) {
+        // - check can call
+        dup5 // push argSize
+        dup5 // push argOffset
+        dup5 // push value
+        dup5 // push contract address
+        0xF1 // push opcode
+        CHECK_GENERIC_CALL()
+}
+
+/// @dev Checks that a call can be performed
+///      -> taking stack [callOpcode, callContract, sentValue, argOffset, argSize]
+///
+/// Arguments :
+///  - function selector (0x04 length... signature of "verifyCall(uint1,address,uint256,bytes,bool)")
+///  - opcode (0x20 length packed)
+///  - contract address (0x20 length packed)
+///  - value sent (0x20 length packed)
+///  - copy of the first 10 words of calldata:
+///      * pointer to data (len 0x20)
+///      * array len (len 0x20)
+///      * actual data (len 0x140)
+///  - isTruncated (0x20 length packed)
+///
+/// Note : Do not use CONSOLE_LOG() in this macro because it writes to 
+///        CALLARGS_MSLOT (avoids allocating debug memory).
+#define macro CHECK_GENERIC_CALL() = takes(4) returns (0) {
+    // copy opcode to args
+    [CALLARGS_MSLOT_opcode] mstore // => [callContract, sentValue, argOffset, argSize]
+
+    // copy contract to args
+    [CALLARGS_MSLOT_contract] mstore // => [sentValue, argOffset, argSize]
+
+    // copy sent value to args
+    [CALLARGS_MSLOT_value] mstore // => [argOffset, argSize]
+
+    // store "isTrucated" as false
+    0x0 [CALLARGS_MSLOT_isTruncated] mstore
+
+    // stack => [argOffset, argSize]
+    swap1 // => [argSize, argOffset]
+
+    //  Check that is not greater than max, else push max
+
+    dup1 [CALLARGS_MAX_DATALEN] lt  // [calldata.length > CALLARGS_MAX_DATALEN, argSize, argOffset]
+    iszero
+    callargs_not_maxed jumpi
+
+    // store "isTrucated" as true
+    0x1 [CALLARGS_MSLOT_isTruncated] mstore
+
+    // pop length, and push max args instead
+    pop
+    [CALLARGS_MAX_DATALEN]
+
+    callargs_not_maxed:
+    // stack => [argSize, argOffset]
+
+    // write signature of verifyCall(uint1,address,uint256,bytes,bool) to selector
+    0x1c8eb044 0xE0 shl [CALLARGS_MSLOT_selector] mstore
+
+    // write a data pointer to args data
+    0xa0 [CALLARGS_MSLOT_calldata] mstore
+
+    // write data length
+    dup1 [CALLARGS_MSLOT_calldata_len] mstore
+
+    // copy calldata
+    [CALLARGS_MSLOT_calldata_raw] // => [target, argSize, argOffset]
+    swap2 // => [argOffset, argSize, target]
+    swap1 // => [argSize, argOffset, target]
+
+    MEM_COPY() //  => []
+
+    // call verifier smartcontract
+    0x20 // retSize
+    [CALLRESULT_MSLOT] // retOffset
+    [CALLARGS_TOTALLEN] // argSize (we're giving it all, since we trust this contract... save a bit of code)
+    [CALLARGS_MSLOT] // argOffset
+    [CALL_VERIFIER_SSLOT] sload // contract to call
+    CHECK_VERIFIER()
+    gas
+    staticcall // => [success]
+
+    // load result
+    [CALLRESULT_MSLOT] mload // => [ok, success]
+
+    // check that the call succeeded
+    and checkcall_success jumpi // => []
+
+    // verification failed
+    0x00 0x00 revert
+
+    checkcall_success:
+}
+
+/// @dev Revert if the sender is not the owner AND the owner is setted.
+#define macro ONLY_OWNER() = takes(0) returns(0) {
+    [OWNER_SSLOT] sload
+    dup1 caller eq is_owner jumpi
+    0x0 eq is_owner jumpi // allow when there is no owner
+    0x00 0x00 revert
+    is_owner:
+}
+
+#define macro CHECK_VERIFIER() = takes(1) returns (1) {
+    dup1 verifier_ok jumpi
+    0x00 0x00 revert
+    verifier_ok:
+}
+
+/**
+copy memory
+takes: size source target
+*/
+#define macro MEM_COPY() = takes(3) returns (0) {
+    memcpy_one:
+    //  -> [size source target]
+    // if nothing to copy, then return
+    dup1 iszero memcpy_end jumpi
+
+    // copy one word (might embed a bit of extra memory if size is not multiple of 0x20, but its ok)
+    dup2 mload // => [data size source target]
+    dup4 mstore // => [size source target]
+
+    // decrement size by 0x20, but maxed to size (size might not be a multiple of 0x20)
+    0x20 dup2 lt // is size lower than 0x20 ? => [isSmall, size, source, target]
+
+    memcpy_end jumpi // jump to end if smaller => [size, source, target]
+
+    // decrement count
+    0x20 swap1 sub // => [new size, source, target]
+    // increment source
+    swap1 0x20 add swap1 // => [new size, new source, target]
+    // increment target
+    swap2 0x20 add swap2 // => [new size, new source, new target]
+
+    // restart
+    memcpy_one jump
+    memcpy_end:
+    pop pop pop
+}
