@@ -16,6 +16,14 @@ contract GMXTest is Test {
     CallHyvm callHyvm;
     GMXLong gmxLong;
     bytes gmxLongHyvmBytecode;
+    // PositionRouter
+    IGMXPositionRouter positionRouter = IGMXPositionRouter(
+            0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868
+        );
+    // Admin of the Position Router
+    address positionRouterAdmin = address(
+        0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8
+    );
 
     //  =====   Set up  =====
     function setUp() public {
@@ -30,14 +38,6 @@ contract GMXTest is Test {
     receive() external payable {}
 
     function testGMXLongNative() public {
-        // PositionRouter
-        IGMXPositionRouter positionRouter = IGMXPositionRouter(
-            0x3D6bA331e3D9702C5e8A8d254e5d8a285F223aba
-        );
-        // Admin of the Position Router
-        address positionRouterAdmin = address(
-            0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8
-        );
         // Deal USDC and ETH to contract that will open a long position
         deal(USDC, address(gmxLong), 1000000000 * 10**6);
         deal(address(gmxLong), 1000000000 * 10**18);
@@ -45,8 +45,6 @@ contract GMXTest is Test {
         gmxLong.gmxLong();
         // Keeper that will execute the requests
         address keeper = address(123);
-        // balance before for the keeper
-        uint256 balanceBefore = keeper.balance;
         // Set keeper address as a keeper for the positionRouter
         // Only admin fuction
         changePrank(positionRouterAdmin);
@@ -58,22 +56,12 @@ contract GMXTest is Test {
             address(gmxLong),
             uint256(1)
         );
-        positionRouter.executeIncreasePosition(key, payable(keeper));
-        // Balance of the keeper after
-        uint256 balanceAfter = keeper.balance;
-        // Verify keeper received fees
-        assertEq(balanceAfter > balanceBefore, true);
+        bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
+        // verify that the request was executed
+        assertEq(exec, true);
     }
 
     function testGMXLongHyvm() public {
-        // PositionRouter
-        IGMXPositionRouter positionRouter = IGMXPositionRouter(
-            0x3D6bA331e3D9702C5e8A8d254e5d8a285F223aba
-        );
-        // Admin of the Position Router
-        address positionRouterAdmin = address(
-            0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8
-        );
         // Deal USDC and ETH to contract that will open a long position
         deal(USDC, address(callHyvm), 1000000000 * 10**6);
         deal(address(callHyvm), 1000000000 * 10**18);
@@ -87,8 +75,6 @@ contract GMXTest is Test {
         callHyvm.callHyvm(hyvm, finalBytecode);
         // Keeper that will execute the requests
         address keeper = address(123);
-        // balance before for the keeper
-        uint256 balanceBefore = keeper.balance;
         // Set keeper address as a keeper for the positionRouter
         // Only admin fuction
         changePrank(positionRouterAdmin);
@@ -100,10 +86,8 @@ contract GMXTest is Test {
             address(callHyvm),
             uint256(1)
         );
-        positionRouter.executeIncreasePosition(key, payable(keeper));
-        // Balance of the keeper after
-        uint256 balanceAfter = keeper.balance;
-        // Verify keeper received fees
-        assertEq(balanceAfter > balanceBefore, true);
+        bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
+        // verify that the request was executed
+        assertEq(exec, true);
     }
 }
