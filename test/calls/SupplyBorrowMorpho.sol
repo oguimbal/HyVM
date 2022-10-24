@@ -34,6 +34,6 @@ contract SupplyBorrowMorpho {
         // balance after borrow
         uint256 USDCBalanceAfter = IERC20(USDC).balanceOf(address(this));
         // check borrowed amount
-        require(USDCBalanceAfter - USDCBalanceBefore >= 10 * 10**6);
+        require(USDCBalanceAfter - USDCBalanceBefore >= 98 * 10**5);
     }
 }

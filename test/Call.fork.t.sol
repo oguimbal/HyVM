@@ -148,8 +148,8 @@ contract CallForkTests is Test {
         address[] memory path = new address[](2);
         path[0] = USDC;
         path[1] = DAI;
-        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
-        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
+        (,,uint256 totalBalanceDAI) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
         assertEq(totalBalanceDAI == 0, true);
         assertEq(totalBalanceUSDC == 0, true);
         bytes memory finalBytecode = Utils
@@ -158,22 +158,22 @@ contract CallForkTests is Test {
                 hex"b9ab7b77"
             );
         callHyvm.callHyvm(hyvm, finalBytecode);
-        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
-        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
-        assertEq(totalBalanceDAI == 9999999, true);
-        assertEq(totalBalanceUSDC >  99 * 10**18, true);
+        (,,totalBalanceUSDC) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
+        (,,totalBalanceDAI) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
+        assertEq(totalBalanceUSDC >= 98 * 10**5, true);
+        assertEq(totalBalanceDAI >=  998 * 10**18, true);
     }
 
     function testSupplyBorrowMorphoNative() public {
         deal(DAI, address(supplyBorrowMorpho), 100_000_000 * 10**18);
-        (,,uint256 totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(callHyvm));
-        (,,uint256 totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(callHyvm));
+        (,,uint256 totalBalanceUSDC) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(supplyBorrowMorpho));
+        (,,uint256 totalBalanceDAI) = lens.getCurrentSupplyBalanceInOf(cDAI, address(supplyBorrowMorpho));
         assertEq(totalBalanceDAI == 0, true);
         assertEq(totalBalanceUSDC == 0, true);
         supplyBorrowMorpho.supplyBorrowMorpho();
-        (,,totalBalanceDAI) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(supplyBorrowMorpho));
-        (,,totalBalanceUSDC) = lens.getCurrentSupplyBalanceInOf(cDAI, address(supplyBorrowMorpho));
-        assertEq(totalBalanceDAI == 9999999, true);
-        assertEq(totalBalanceUSDC >  99 * 10**18, true);
+        (,,totalBalanceUSDC) = lens.getCurrentBorrowBalanceInOf(cUSDC, address(supplyBorrowMorpho));
+        (,,totalBalanceDAI) = lens.getCurrentSupplyBalanceInOf(cDAI, address(supplyBorrowMorpho));
+        assertEq(totalBalanceUSDC >= 98 * 10**5, true);
+        assertEq(totalBalanceDAI >=  998 * 10**18, true);
     }
 }
