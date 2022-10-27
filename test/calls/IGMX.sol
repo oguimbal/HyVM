@@ -13,7 +13,9 @@ interface IGMXPositionRouter {
         uint256 _executionFee,
         bytes32 _referralCode,
         address _callbackTarget
-    ) external payable;
+    )
+        external
+        payable;
 
     function executeIncreasePosition(bytes32 _key, address payable _executionFeeReceiver) external returns (bool);
     function getRequestKey(address _account, uint256 _index) external pure returns (bytes32);
