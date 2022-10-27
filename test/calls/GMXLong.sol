@@ -10,7 +10,7 @@ contract GMXLong {
 
     uint256 private constant amountUSDC = 1000 * 10**6;
     IGMXRouter private constant GMXRouter = IGMXRouter(0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064);
-    IGMXPositionRouter private constant positionRouter = IGMXPositionRouter(0x3D6bA331e3D9702C5e8A8d254e5d8a285F223aba);
+    IGMXPositionRouter private constant positionRouter = IGMXPositionRouter(0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868);
 
     constructor(){}
 
@@ -31,7 +31,8 @@ contract GMXLong {
         true, // _isLong
         3000 * 10**30, // _acceptablePrice
         3000_000_000_000_000, // _executionFee
-        bytes32(0)); // _referralCode
+        bytes32(0), // _referralCode
+        address(0)); // _callbackTarget
     }
     receive() external payable {}
 }
