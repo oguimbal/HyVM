@@ -8,7 +8,7 @@ import "./CallVerifiers.sol";
 
 import "./calls/IERC20.sol";
 
-import "./calls/DoubleSwap_native.sol";
+import "./calls/DoubleSwap.sol";
 import "./calls/CallHyvm.sol";
 
 import "./calls/SupplyBorrowMorpho.sol";
@@ -44,7 +44,7 @@ contract CallForkTests is Test {
         doubleSwap = new DoubleSwap();
         callHyvm = new CallHyvm();
 
-        doubleswapHyvmBytecode = getDoubleSwapBytecode();
+        doubleswapHyvmBytecode = type(DoubleSwap).runtimeCode;
         depositBorrowAaveHyvmBytecode = getDepositBorrowAaveHyvmBytecode();
         supplyBorrowMorphoHyvmBytecode = getSupplyBorrowMorphoHyvmBytecode();
 
@@ -53,12 +53,6 @@ contract CallForkTests is Test {
     }
 
     receive() external payable {}
-
-    function getDoubleSwapBytecode() public returns (bytes memory bytecode) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DoubleSwap_hyvm.sol | head -4 | tail -1)';
-        return executeBashCommand(bashCommand);
-    }
 
     function getDepositBorrowAaveHyvmBytecode() public returns (bytes memory) {
         string
@@ -92,18 +86,27 @@ contract CallForkTests is Test {
 
     function testDoubleSwap_hyvm_solidity() public {
         deal(USDC, address(callHyvm), 100_000_000 * 10**6);
-        callHyvm.callHyvm(hyvm, doubleswapHyvmBytecode);
+        // replace "doubleSwap" selector and bypass calldata size check
+        bytes memory finalBytecode = Utils
+            .replaceSelectorBypassCalldataSizeCheck(
+                doubleswapHyvmBytecode,
+                hex"64c2c785"
+            );
+        callHyvm.callHyvm(hyvm, finalBytecode);
+        require(IERC20(DAI).balanceOf(address(callHyvm)) >= 9800000000000000);
     }
 
     function testDoubleSwap_native_huff() public {
         deal(USDC, address(this), 100_000_000 * 10**6);
         (bool success, ) = doubleSwapHuff.delegatecall(new bytes(0));
         assertEq(success, true);
+        require(IERC20(DAI).balanceOf(address(this)) >= 9800000000000000);
     }
 
     function testDoubleSwap_hyvm_huff() public {
         deal(USDC, address(callHyvm), 100_000_000 * 10**6);
         callHyvm.callHyvm(hyvm, doubleSwapHuff.code);
+        require(IERC20(DAI).balanceOf(address(callHyvm)) >= 9800000000000000);
     }
 
     function testDepositBorrowAaveHyvm() public {
