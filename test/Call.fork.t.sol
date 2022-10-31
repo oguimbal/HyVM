@@ -45,7 +45,7 @@ contract CallForkTests is Test {
         callHyvm = new CallHyvm();
 
         doubleswapHyvmBytecode = type(DoubleSwap).runtimeCode;
-        depositBorrowAaveHyvmBytecode = getDepositBorrowAaveHyvmBytecode();
+        depositBorrowAaveHyvmBytecode = type(DepositBorrowAave).runtimeCode;
         supplyBorrowMorphoHyvmBytecode = getSupplyBorrowMorphoHyvmBytecode();
 
         supplyBorrowMorpho = new SupplyBorrowMorpho();
@@ -53,12 +53,6 @@ contract CallForkTests is Test {
     }
 
     receive() external payable {}
-
-    function getDepositBorrowAaveHyvmBytecode() public returns (bytes memory) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DepositBorrowAave.sol | head -4 | tail -1 | cut -c 65-)';
-        return executeBashCommand(bashCommand);
-    }
 
     function getSupplyBorrowMorphoHyvmBytecode() public returns (bytes memory) {
         string
