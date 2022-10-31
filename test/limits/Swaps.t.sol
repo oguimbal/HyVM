@@ -9,6 +9,10 @@ import "../calls/CallHyvm.sol";
 import "../calls/IERC20.sol";
 import "../calls/IUniswapV2Router01.sol";
 
+import "test/calls/limitTesting/MultipleInlineSwaps_hyvm.sol";
+import "test/calls/limitTesting/MultipleLoopedSwaps_hyvm.sol";
+
+
 contract LimitSwapsTest is Test {
     address hyvm;
     address owner;
@@ -34,8 +38,8 @@ contract LimitSwapsTest is Test {
         hyvm = HuffDeployer.deploy("HyVM");
         callHyvm = new CallHyvm();
 
-        multipleInlineSwapHyvmBytecode = getMultipleInlineSwapBytecode();
-        multipleLoopedSwapHyvmBytecode = getMultipleLoopedSwapBytecode();
+        multipleInlineSwapHyvmBytecode = type(MultipleSwap).creationCode;
+        multipleLoopedSwapHyvmBytecode = type(MultipleLoopedSwap).creationCode;
 
         // Debug labels
         vm.label(USDC, "USDC");
@@ -47,35 +51,12 @@ contract LimitSwapsTest is Test {
         vm.label(address(uniswapRouter), "uniswapRouter");
     }
 
-    function getMultipleInlineSwapBytecode() public returns (bytes memory bytecode) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/MultipleInlineSwaps_hyvm.sol | head -12 | tail -1)';
-
-        string[] memory inputs = new string[](3);
-        inputs[0] = "bash";
-        inputs[1] = "-c";
-        inputs[2] = bashCommand;
-        bytecode = abi.decode(vm.ffi(inputs), (bytes));
-    }
-
-    function getMultipleLoopedSwapBytecode() public returns (bytes memory bytecode) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/MultipleLoopedSwaps_hyvm.sol | head -12 | tail -1)';
-
-        string[] memory inputs = new string[](3);
-        inputs[0] = "bash";
-        inputs[1] = "-c";
-        inputs[2] = bashCommand;
-        bytecode = abi.decode(vm.ffi(inputs), (bytes));
-    }
-
     function testMultipleInlineSwaps() public {
         deal(USDC, address(callHyvm), 100_000_000);
         deal(USDC, address(this), 100_000_000);
 
         callHyvm.callHyvm(hyvm, multipleInlineSwapHyvmBytecode);
     }
-
     
     function testMultipleLoopedSwaps1() public {
         deal(USDC, address(callHyvm), type(uint16).max);

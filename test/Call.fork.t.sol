@@ -8,7 +8,7 @@ import "./CallVerifiers.sol";
 
 import "./calls/IERC20.sol";
 
-import "./calls/DoubleSwap_native.sol";
+import "./calls/DoubleSwap.sol";
 import "./calls/CallHyvm.sol";
 
 import "./calls/SupplyBorrowMorpho.sol";
@@ -44,44 +44,15 @@ contract CallForkTests is Test {
         doubleSwap = new DoubleSwap();
         callHyvm = new CallHyvm();
 
-        doubleswapHyvmBytecode = getDoubleSwapBytecode();
-        depositBorrowAaveHyvmBytecode = getDepositBorrowAaveHyvmBytecode();
-        supplyBorrowMorphoHyvmBytecode = getSupplyBorrowMorphoHyvmBytecode();
+        doubleswapHyvmBytecode = type(DoubleSwap).runtimeCode;
+        depositBorrowAaveHyvmBytecode = type(DepositBorrowAave).runtimeCode;
+        supplyBorrowMorphoHyvmBytecode = type(SupplyBorrowMorpho).runtimeCode;
 
         supplyBorrowMorpho = new SupplyBorrowMorpho();
         depositBorrowAave = new DepositBorrowAave();
     }
 
     receive() external payable {}
-
-    function getDoubleSwapBytecode() public returns (bytes memory bytecode) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DoubleSwap_hyvm.sol | head -4 | tail -1)';
-        return executeBashCommand(bashCommand);
-    }
-
-    function getDepositBorrowAaveHyvmBytecode() public returns (bytes memory) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/DepositBorrowAave.sol | head -4 | tail -1 | cut -c 65-)';
-        return executeBashCommand(bashCommand);
-    }
-
-    function getSupplyBorrowMorphoHyvmBytecode() public returns (bytes memory) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/SupplyBorrowMorpho.sol | tail -1 | cut -c 65-)';
-        return executeBashCommand(bashCommand);
-    }
-
-    function executeBashCommand(string memory bashCommand)
-        public
-        returns (bytes memory bytecode)
-    {
-        string[] memory inputs = new string[](3);
-        inputs[0] = "bash";
-        inputs[1] = "-c";
-        inputs[2] = bashCommand;
-        bytecode = abi.decode(vm.ffi(inputs), (bytes));
-    }
 
     // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
 
@@ -92,18 +63,27 @@ contract CallForkTests is Test {
 
     function testDoubleSwap_hyvm_solidity() public {
         deal(USDC, address(callHyvm), 100_000_000 * 10**6);
-        callHyvm.callHyvm(hyvm, doubleswapHyvmBytecode);
+        // replace "doubleSwap" selector and bypass calldata size check
+        bytes memory finalBytecode = Utils
+            .replaceSelectorBypassCalldataSizeCheck(
+                doubleswapHyvmBytecode,
+                hex"64c2c785"
+            );
+        callHyvm.callHyvm(hyvm, finalBytecode);
+        require(IERC20(DAI).balanceOf(address(callHyvm)) >= 9800000000000000);
     }
 
     function testDoubleSwap_native_huff() public {
         deal(USDC, address(this), 100_000_000 * 10**6);
         (bool success, ) = doubleSwapHuff.delegatecall(new bytes(0));
         assertEq(success, true);
+        require(IERC20(DAI).balanceOf(address(this)) >= 9800000000000000);
     }
 
     function testDoubleSwap_hyvm_huff() public {
         deal(USDC, address(callHyvm), 100_000_000 * 10**6);
         callHyvm.callHyvm(hyvm, doubleSwapHuff.code);
+        require(IERC20(DAI).balanceOf(address(callHyvm)) >= 9800000000000000);
     }
 
     function testDepositBorrowAaveHyvm() public {
