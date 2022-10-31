@@ -46,30 +46,13 @@ contract CallForkTests is Test {
 
         doubleswapHyvmBytecode = type(DoubleSwap).runtimeCode;
         depositBorrowAaveHyvmBytecode = type(DepositBorrowAave).runtimeCode;
-        supplyBorrowMorphoHyvmBytecode = getSupplyBorrowMorphoHyvmBytecode();
+        supplyBorrowMorphoHyvmBytecode = type(SupplyBorrowMorpho).runtimeCode;
 
         supplyBorrowMorpho = new SupplyBorrowMorpho();
         depositBorrowAave = new DepositBorrowAave();
     }
 
     receive() external payable {}
-
-    function getSupplyBorrowMorphoHyvmBytecode() public returns (bytes memory) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/SupplyBorrowMorpho.sol | tail -1 | cut -c 65-)';
-        return executeBashCommand(bashCommand);
-    }
-
-    function executeBashCommand(string memory bashCommand)
-        public
-        returns (bytes memory bytecode)
-    {
-        string[] memory inputs = new string[](3);
-        inputs[0] = "bash";
-        inputs[1] = "-c";
-        inputs[2] = bashCommand;
-        bytecode = abi.decode(vm.ffi(inputs), (bytes));
-    }
 
     // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
 
