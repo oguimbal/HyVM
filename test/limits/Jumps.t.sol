@@ -9,6 +9,8 @@ import "../calls/CallHyvm.sol";
 import "../calls/IERC20.sol";
 import "../calls/IUniswapV2Router01.sol";
 
+import "test/calls/limitTesting/Jumps_hyvm.sol";
+
 contract LimitSwapsTest is Test {
     address hyvm;
     address owner;
@@ -24,18 +26,7 @@ contract LimitSwapsTest is Test {
         hyvm = HuffDeployer.deploy("HyVM");
         callHyvm = new CallHyvm();
 
-        jumpsHyvmBytecode = getMaximumStackSizeHyvmBytecodeBytecode();
-    }
-
-    function getMaximumStackSizeHyvmBytecodeBytecode() public returns (bytes memory bytecode) {
-        string
-            memory bashCommand = 'cast abi-encode "f(bytes)" $(solc --optimize --bin test/calls/limitTesting/Jumps_hyvm.sol | head -12 | tail -1)';
-
-        string[] memory inputs = new string[](3);
-        inputs[0] = "bash";
-        inputs[1] = "-c";
-        inputs[2] = bashCommand;
-        bytecode = abi.decode(vm.ffi(inputs), (bytes));
+        jumpsHyvmBytecode = type(Jumps).creationCode;
     }
 
     function testJumpsHyvmBytecode0() public {
