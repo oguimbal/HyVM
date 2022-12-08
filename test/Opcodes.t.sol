@@ -7,6 +7,10 @@ import "forge-std/console.sol";
 import './Utils.sol';
 
 contract OpcodesTest is Test {
+    // Will be made available as a forge-std constant in 1.2.0 release
+    // https://github.com/foundry-rs/forge-std/pull/229
+    address constant DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+
     address public hyvm;
 
     function setUp() public {
@@ -385,8 +389,7 @@ contract OpcodesTest is Test {
         (bool success, bytes memory data) = hyvm.delegatecall(hex"3260005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
-        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
-        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+        assertEq(result, DEFAULT_SENDER);
     }
 
     function testOrigin_call() public {
@@ -394,8 +397,7 @@ contract OpcodesTest is Test {
         (bool success, bytes memory data) = hyvm.call(hex"3260005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
-        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
-        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+        assertEq(result, DEFAULT_SENDER);
     }
 
     function testOrigin_staticcall() public {
@@ -403,8 +405,7 @@ contract OpcodesTest is Test {
         (bool success, bytes memory data) = hyvm.staticcall(hex"3260005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
-        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
-        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+        assertEq(result, DEFAULT_SENDER);
     }
 
     function testCaller_delegatecall() public {
@@ -412,8 +413,7 @@ contract OpcodesTest is Test {
         (bool success, bytes memory data) = hyvm.delegatecall(hex"3360005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
-        // 0x00a329c0648769A73afAc7F9381E08FB43dBEA72 is default sender and tx_origin in forge
-        assertEq(result, 0x00a329c0648769A73afAc7F9381E08FB43dBEA72);
+        assertEq(result, DEFAULT_SENDER);
     }
 
     function testCaller_call() public {
