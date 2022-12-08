@@ -890,10 +890,10 @@
 /// @dev Move the pointer to the next instruction
 #define macro CONTINUE() = takes(0) returns (1) {
     // load the instruction located at this execution pointer
-    [EXEC_POINTER_MSLOT] mload
+    [EXEC_POINTER_MSLOT] mload // [ptr]
 
-    GOTO_AND_ADVANCE() // => [opcode]
+    GOTO_AND_ADVANCE()         // [opcode]
 
     // jump to the operation given on stack
-    JUMP_TO_OPCODE()
+    JUMP_TO_OPCODE()           // []
 }
