@@ -4,8 +4,8 @@
 /// @notice Run arbitrary code on the EVM
 /// @dev This version uses the "no-verifier" abstraction, but "contract-verifier" can be used.
 
-#include "Pointer.huff"
-#include "Jump-table.huff"
+#include "./Pointer.huff"
+#include "./Jump-table.huff"
 #include "./abstracts/no-verifier.huff"
 
 /* -------------------------------------------------------------------------- */
