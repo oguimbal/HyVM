@@ -41,17 +41,19 @@
     __tablesize(OPCODES_JUMPTABLE) __tablestart(OPCODES_JUMPTABLE) [JUMPTABLE_MSLOT] codecopy
 }
 
-#define macro JUMP_TO_OPCODE() = takes(1) returns (0) {
-    JUMPTABLE_LOCATION()
-    jump // jump to location => []
-}
-
 #define macro JUMPTABLE_LOCATION() = takes(1) returns (1) {
+    // Takes              // [opcode]
     // 2 bytes per instruction (jumptable_packed)
-    0x2 mul
-    [JUMPTABLE_MSLOT] add // => [memory location in jumptable]
-    mload // => [code location]
+    0x2 mul               // [0x2 * opcode]
+    [JUMPTABLE_MSLOT] add // [memory location in jumptable]
+    mload                 // [code location]
 
     // only get the first two bytes
-    0xF0 shr
+    0xF0 shr              // [opcode jump location]
+}
+
+#define macro JUMP_TO_OPCODE() = takes(1) returns (0) {
+    // Takes             // [opcode]
+    JUMPTABLE_LOCATION() // [opcode jump location]
+    jump                 // []
 }
