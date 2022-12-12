@@ -760,109 +760,109 @@
     /* ---------------------------------- CALL ---------------------------------- */
 
     op_call:
-        // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap3
-        FIX_MEMOFFSET()
-        swap3
+        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
+        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // - fix retOffset
-        swap5
-        FIX_MEMOFFSET()
-        swap5
+        // fix retOffset
+        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_CALL()
+        // check can call
+        CHECK_CALL()        // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-
-        call
+        call                // [success]
         CONTINUE()
 
     /* -------------------------------- CALLCODE -------------------------------- */
 
     op_callcode:
+        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
+        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap3
-        FIX_MEMOFFSET()
-        swap3
+        // fix retOffset
+        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - fix retOffset
-        swap5
-        FIX_MEMOFFSET()
-        swap5
+        // check can call
+        CHECK_CALLCODE()    // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_CALLCODE()
-
-        callcode
+        callcode            // [success]
         CONTINUE()
 
     /* --------------------------------- RETURN --------------------------------- */
     
     op_return:
-
-        // fix the memory offset to return
-        FIX_MEMOFFSET()
-
-        // execute return
+        // takes         // [retOffset, retSize]
+        // fix retOffset
+        FIX_MEMOFFSET()  // [hyvmRetOffset, retSize]
         return
 
     /* ------------------------------ DELEGATECALL ------------------------------ */
 
     op_delegatecall:
-        // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap2
-        FIX_MEMOFFSET()
-        swap2
+        // takes                // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap2                   // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()         // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
+        swap2                   // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // - fix retOffset
-        swap4
-        FIX_MEMOFFSET()
-        swap4
+        // fix retOffset
+        swap4                   // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()         // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4                   // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_DELEGATECALL()
+        // check can call
+        CHECK_DELEGATECALL()    // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        delegatecall
+        delegatecall            // [success]
         CONTINUE()
 
     /* --------------------------------- CREATE2 -------------------------------- */
 
     op_create2:
-        swap1
-        FIX_MEMOFFSET()
-        swap1
-        create2
+        // takes        // [value, offset, size, salt]
+
+        // fix offset
+        swap1           // [offset, value, size, salt]
+        FIX_MEMOFFSET() // [hyvmOffset, value, size, salt]
+        swap1           // [value, hyvmOffset, size, salt]
+        create2         // [success]
         CONTINUE()
 
     /* ------------------------------- STATICCALL ------------------------------- */
 
     op_staticcall:
-        // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap2
-        FIX_MEMOFFSET()
-        swap2
+        // takes            // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap2               // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, gas, argsSize, retOffset, retSize]
+        swap2               // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // - fix retOffset
-        swap4
-        FIX_MEMOFFSET()
-        swap4
+        // fix retOffset
+        swap4               // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4               // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_STATICCALL()
+        // check can call
+        CHECK_STATICCALL()  // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        staticcall
+        staticcall          // [success]
         CONTINUE()
 
     /* --------------------------------- REVERT --------------------------------- */
 
     op_revert:
-        FIX_MEMOFFSET()
-        revert
+        // takes        // [offset, size]
+        FIX_MEMOFFSET() // [hyvmOffset, size]
+        revert          // [hyvmOffset, size]
         CONTINUE()
 
     /* --------------------------------- INVALID -------------------------------- */
