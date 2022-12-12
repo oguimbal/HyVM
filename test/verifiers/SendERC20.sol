@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import "./IERC20.sol";
+import "../calls/IERC20.sol";
 
 contract SimpleTransfer {
     IERC20 public constant token = IERC20(0x1234567890AbcdEF1234567890aBcdef12345678);

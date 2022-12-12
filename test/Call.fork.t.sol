@@ -4,7 +4,6 @@ import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "./Utils.sol";
-import "./CallVerifiers.sol";
 
 import "./calls/IERC20.sol";
 
