@@ -3,8 +3,7 @@ pragma solidity ^0.8.15;
 
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-import './Utils.sol';
+import {Utils} from "./utils/Utils.sol";
 
 contract OpcodesTest is Test {
     // Will be made available as a forge-std constant in 1.2.0 release

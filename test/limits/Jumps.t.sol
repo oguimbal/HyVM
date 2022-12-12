@@ -2,12 +2,11 @@
 pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
 
 import "../calls/CallHyvm.sol";
 
-import "../calls/IERC20.sol";
-import "../calls/IUniswapV2Router01.sol";
+import {IERC20} from "../utils/interfaces/IERC20.sol";
+import {IUniswapV2Router01} from "../utils/interfaces/IUniswapV2Router01.sol";
 
 import "test/calls/limitTesting/Jumps_hyvm.sol";
 
