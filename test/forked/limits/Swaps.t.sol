@@ -3,13 +3,13 @@ pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
-import "../calls/CallHyvm.sol";
+import {CallHyvm} from "../calls/CallHyvm.sol";
 
-import {IERC20} from "../utils/interfaces/IERC20.sol";
-import {IUniswapV2Router01} from "../utils/interfaces/IUniswapV2Router01.sol";
+import {IERC20} from "../../utils/interfaces/IERC20.sol";
+import {IUniswapV2Router01} from "../../utils/interfaces/IUniswapV2Router01.sol";
 
-import "test/calls/limitTesting/MultipleInlineSwaps_hyvm.sol";
-import "test/calls/limitTesting/MultipleLoopedSwaps_hyvm.sol";
+import {MultipleSwap} from "../calls/limitTesting/MultipleInlineSwaps_hyvm.sol";
+import {MultipleLoopedSwap} from "../calls/limitTesting/MultipleLoopedSwaps_hyvm.sol";
 
 
 contract LimitSwapsTest is Test {

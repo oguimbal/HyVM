@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
 
 contract Looper {
     address hyvm;

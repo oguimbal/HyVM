@@ -4,12 +4,12 @@ pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
-import "./Looper.sol";
+import {Looper} from "./Looper.sol";
 
-import {Utils} from "../../utils/Utils.sol";
-import "../../calls/CallHyvm.sol";
+import {Utils} from "../../../utils/Utils.sol";
+import {CallHyvm} from "../../calls/CallHyvm.sol";
 
-import "test/calls/limitTesting/LoopedCall_hyvm.sol";
+import {LoopedCall} from "../../calls/limitTesting/LoopedCall_hyvm.sol";
 
 contract LoopedCallTest is Test {
     address hyvm;

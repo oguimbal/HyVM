@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
-import {Utils} from "./utils/Utils.sol";
+import {Utils} from "../utils/Utils.sol";
 import "./calls/CallHyvm.sol";
 import "./calls/GMXLong.sol";
 import "./calls/IGMX.sol";
