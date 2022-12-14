@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: Unlicence
+
+/// @title Pointer Logic
+
+/* -------------------------------------------------------------------------- */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Will store the pointer at mem 0, and correct all memory writes
+#define constant EXEC_POINTER_MSLOT = 0x0
+
+/* -------------------------------------------------------------------------- */
+/*                                   MACROS                                   */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Get the host instruction at given pointer location, and advance pointer by one.
+#define macro GOTO_AND_ADVANCE() = takes (1) returns (1) {
+    // Takes:                   // [ptr]
+    dup1                        // [ptr, ptr]
+    LOAD_OPCODE()               // [opcode, ptr]
+
+    // Increment the exec pointer to the next byte
+    // equivalent to INCREMENT_EXEC_PTR(), but avoids an mload.
+    swap1                       // [ptr, opcode]
+    0x1 add                     // [new ptr, opcode]
+    [EXEC_POINTER_MSLOT] mstore // [opcode]
+}
+
+/// @dev Load the opcode corresponding to the execution pointer on stack
+#define macro LOAD_OPCODE() = takes(1) returns (1) {
+    // Takes:                   // [ptr]
+    calldataload                // [256 bits of code starting at execution pointer, ptr]
+
+    // extract opcode from leftmost byte
+    // F8 = 248 = 256 - 8
+    0xF8 shr                    // [opcode, ptr]
+}
+
+/// @dev Adjust the top stack item to prevent writing exec pointer.
+///      Top stack item is a memory location.
+///      Offsets all memory instructions to locate them at the start of memory
+///      allocated to host. Everything before will be owned by the VM, and
+///      innaccessible by the host.
+#define macro FIX_MEMOFFSET() = takes (1) returns (1) {
+    // Takes                // [mem_offset]
+    [HOST_MEMORY_START] add // [mem_offset + HOST_MEMORY_START]
+}
+
+/// @dev Increment the execution pointer location by one byte
+#define macro INCREMENT_EXEC_PTR() = takes(0) returns (0) {
+    0x1
+    INCREMENT_EXEC_PTR_N()
+}
+
+/// @dev Increment the execution pointer location by the amount given on stack n
+#define macro INCREMENT_EXEC_PTR_N() = takes(1) returns (0) {
+    // Takes                    // [n]
+    // load current ptr
+    [EXEC_POINTER_MSLOT] mload  // [ptr, n]
+    // add with value on stack
+    add                         // [new_ptr]
+    // and store it back
+    [EXEC_POINTER_MSLOT] mstore // []
+}
+
+/// @dev Pushes data that has the given size n
+#define macro PICK_DATA() = takes(1) returns (1) {
+    // Takes                    // [n]
+    // get 256 bits at execution pointer
+    [EXEC_POINTER_MSLOT] mload  // [execPtr, n]
+    dup1                        // [execPtr, execPtr, n]
+    calldataload                // [256 bits of code, execPtr, n]
+
+    // duplicate num of bytes
+    dup3                        // [n, code, execPtr, n]
+
+    // will be shifted by: (32 - n)
+    0x20                        // [0x20, n, code, execPtr, n]
+    sub                         // [shiftBy in Bytes, code, execPtr, n]
+    0x8 mul                     // [shiftBy, code, execPtr, n]
+
+    // truncate it
+    shr                         // [ret, execPtr, n]
+
+    // increment pointer
+    swap2                       // [execPtr, n, ret]
+    add                         // [newExecPtr, ret]
+    [EXEC_POINTER_MSLOT] mstore // [ret]
+}
+
+/// @dev Move the pointer to the next instruction
+#define macro CONTINUE() = takes(0) returns (1) {
+    // load the instruction located at this execution pointer
+    [EXEC_POINTER_MSLOT] mload // [ptr]
+
+    GOTO_AND_ADVANCE()         // [opcode]
+
+    // jump to the operation given on stack
+    JUMP_TO_OPCODE()           // []
+}

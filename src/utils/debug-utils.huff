@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: Unlicence
+
 // memory reserved
 #define constant DEBUG_MSLOT = 0x220
-/**
+
+
+/*
  logs a small string (must fit in a single 256 bits word)
  usage example to log "hello":
  1) get encoding via: logStr("hello")))  where:
@@ -42,7 +46,7 @@
     //   0000000000000000000000000000000000000000000000000000000000000005 string len
     //   68656c6c6f000000000000000000000000000000000000000000000000000000 string data
 
-    /*
+   /*
         FYI, to replicate this in solidity/yul...
         - The easy version:
                 bytes memory payload = abi.encodeWithSignature("log(string)", "hello");
@@ -92,7 +96,6 @@
     0x4 add
     mstore
 
-
     // 2) Perform the call
     0x0
     0x0
@@ -104,9 +107,7 @@
     pop // pop the "success" flag
 }
 
-
-
-/** Logs the top stack element */
+/// @dev Logs the top stack element
 #define macro CONSOLE_LOG_UINT() = takes(1) returns (1) {
     // see implementation of foundry console.log(uint)
     //  at https://github.com/foundry-rs/foundry/blob/master/testdata/logs/console.sol
@@ -141,17 +142,8 @@
     pop // pop the "success" flag
 }
 
-
-#define macro CONSOLE_LOG_HELLO() = takes(0) returns (0) {
-    // console.log('hello')
-    0x68656c6c6f000000000000000000000000000000000000000000000000000000
-    0x5
-    CONSOLE_LOG()
-}
-
-
-// Push the function name which is not implemented, then call this.
-//  (see console_log())
+/// @dev Push the function name which is not implemented, then call this.
+///      (see console_log())
 #define macro CONSOLE_NOTIMPLEMENTED_FN() = takes(2) returns (0) {
     // console.log('not implemented:')
     0x6e6f7420696d706c656d656e7465643a00000000000000000000000000000000
@@ -222,4 +214,11 @@
         swap1 // => [i, str]
 
         CONSOLE_LOG()
+}
+
+#define macro CONSOLE_LOG_HELLO() = takes(0) returns (0) {
+    // console.log('hello')
+    0x68656c6c6f000000000000000000000000000000000000000000000000000000
+    0x5
+    CONSOLE_LOG()
 }

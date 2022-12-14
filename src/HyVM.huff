@@ -1,150 +1,19 @@
-// Resouces https://medium.com/aztec-protocol/from-zero-to-nowhere-smart-contract-programming-in-huff-1-2-ba2b6de7fa83
-// TODO emit nice reverts https://docs.huff.sh/get-started/huff-by-example/#custom-errors
-#include "debug-utils.huff"
-#include "macros.huff"
-// #include "./checkers/contract-verifier.huff"
-#include "./checkers/no-verifier.huff"
+// SPDX-License-Identifier: Unlicence
 
-// === define where we'll store VM private things
+/// @title HyVM
+/// @notice Run arbitrary code on the EVM
+/// @dev This version uses the "no-verifier" abstraction, but "contract-verifier" can be used.
 
-// will store the pointer at mem 0, and correct all memory writes
-#define constant EXEC_POINTER_MSLOT = 0x0
-#define constant JUMPTABLE_MSLOT = 0x20
+#include "./Pointer.huff"
+#include "./Jump-table.huff"
+#include "./abstracts/no-verifier.huff"
 
-/* Generated at: https://www.evm.codes/
-    const byId = new Map([...document.getElementsByTagName('tbody')[0].children].map(c => {
-        const children =   [...c.children];
-        return [parseInt(children[0].innerText, 16), 'op_' + children[1].innerText.toLowerCase()];
-    }))
-    Array(256).fill(null).map((_, i) => byId.get(i) || 'unused').join(' ')
+/* -------------------------------------------------------------------------- */
+/*                                  FALLBACK                                  */
+/* -------------------------------------------------------------------------- */
 
-
-    and then, adapted
-*/
-#define jumptable__packed OPCODES_JUMPTABLE {
-op_stop             op_add          op_mul          op_sub      op_div          op_sdiv         op_mod          op_smod             op_addmod       op_mulmod       op_exp          op_signextend   unused          unused              unused              unused
-op_lt               op_gt           op_slt          op_sgt      op_eq           op_iszero       op_and          op_or               op_xor          op_not          op_byte         op_shl          op_shr          op_sar              unused              unused
-op_sha3             unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-op_address          op_balance      op_origin       op_caller   op_callvalue    op_calldataload op_calldatasize op_calldatacopy     op_codesize     op_codecopy     op_gasprice     op_extcodesize  op_extcodecopy  op_returndatasize   op_returndatacopy   op_extcodehash
-op_blockhash        op_coinbase     op_timestamp    op_number   op_difficulty   op_gaslimit     op_chainid      op_selfbalance      op_basefee      unused          unused          unused          unused          unused              unused              unused
-op_pop              op_mload        op_mstore       op_mstore8  op_sload        op_sstore       op_jump         op_jumpi            op_pc           op_msize        op_gas          op_jumpdest     unused          unused              unused              unused
-op_push1            op_push2        op_push3        op_push4    op_push5        op_push6        op_push7        op_push8            op_push9        op_push10       op_push11       op_push12       op_push13       op_push14           op_push15           op_push16
-op_push17           op_push18       op_push19       op_push20   op_push21       op_push22       op_push23       op_push24           op_push25       op_push26       op_push27       op_push28       op_push29       op_push30           op_push31           op_push32
-op_dup1             op_dup2         op_dup3         op_dup4     op_dup5         op_dup6         op_dup7         op_dup8             op_dup9         op_dup10        op_dup11        op_dup12        op_dup13        op_dup14            op_dup15            op_dup16
-op_swap1            op_swap2        op_swap3        op_swap4    op_swap5        op_swap6        op_swap7        op_swap8            op_swap9        op_swap10       op_swap11       op_swap12       op_swap13       op_swap14           op_swap15           op_swap16
-op_log0             op_log1         op_log2         op_log3     op_log4         unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
-op_create           op_call         op_callcode     op_return   op_delegatecall op_create2      unused          unused              unused          unused          op_staticcall   unused          unused          op_revert           op_invalid          selfdestruct
-}
-
-#define macro INIT_JUMPTABLE() = takes(0) returns(0) {
-    __tablesize(OPCODES_JUMPTABLE) __tablestart(OPCODES_JUMPTABLE) [JUMPTABLE_MSLOT] codecopy
-}
-
-#define macro JUMPTABLE_LOCATION() = takes(1) returns (1) {
-    /*
-        // to investigate jumptable issues, this is usefull:
-
-            op_delegatecall CONSOLE_LOG_UINT() pop // log the location of a label
-            0xF4 JUMPTABLE_LOCATION() CONSOLE_LOG_UINT() pop // log the resolved location of the corresponding instruction
-
-            // log the full jumptable
-            [JUMPTABLE_MSLOT]
-            0x00 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            0x20 add dup1 mload CONSOLE_LOG_UINT() pop
-            pop
-
-    */
-
-    // 2 bytes per instruction (jumptable_packed)
-    0x2 mul
-    [JUMPTABLE_MSLOT] add // => [memory location in jumptable]
-    mload // => [code location]
-
-    // only get the first two bytes
-    0xF0 shr
-
-}
-
-#define macro JUMP_TO_OPCODE() = takes(1) returns (0) {
-    JUMPTABLE_LOCATION()
-    jump // jump to location => []
-}
-
-
-
-// top stack item is a memory location: adjust the top stack item to prevent writing exec pointer.
-#define macro FIX_MEMOFFSET() = takes (1) returns (1) {
-    // offsets all memory instructions to locate them at the start of memory allocated to host
-    // => everything before will be owned by the VM, and innaccessible by the host.
-    [HOST_MEMORY_START] add
-}
-
-// load the opcode corresponding to the execution pointer on stack
-#define macro LOAD_OPCODE() = takes(1) returns (1) {
-    calldataload // => [256 bits of code starting at execution pointer, ptr]
-
-    // extract opcode from leftmost byte   => [opcode, ptr]
-    0xF8 shr // F8 = 248 = 256 - 8
-}
-
-
-// get the host instruction at given pointer location, and advance pointer by one
-// (nb: this is used both by CONTINUE() and by jump instruction)
-#define macro GOTO_AND_ADVANCE() = takes (1) returns (1) {
-
-    dup1 // => [ptr, ptr]
-    LOAD_OPCODE() // => [opcode, ptr]
-
-    // increment the exec pointer to the next byte
-    //  ... equivalent to INCREMENT_EXEC_PTR(), but avoids an mload.
-    swap1 // => [ptr, opcode]
-    0x1 add// => [new ptr, opcode]
-    [EXEC_POINTER_MSLOT] mstore // => [opcode]
-}
-
-#define macro CONTINUE() = takes(0) returns (1) {
-
-    // load the instruction located at this execution pointer
-    [EXEC_POINTER_MSLOT] mload
-
-    GOTO_AND_ADVANCE() // => [opcode]
-
-
-    // // console.log('opcode:')
-    // 0x6f70636f64653a00000000000000000000000000000000000000000000000000
-    // 0x0000000000000000000000000000000000000000000000000000000000000007
-    // CONSOLE_LOG()
-    // // console.log(opcode)
-    // CONSOLE_LOG_UINT()
-
-    // jump to the operation given on stack
-    JUMP_TO_OPCODE()
-}
-
-
-
-// start program
+/// @notice Entry point of the HyVM
 #define macro MAIN() = takes(0) returns (0) {
-
-
     // init memory by storing a word just before the host memory start
     // so msize will return 0
     0x0 0x20 [HOST_MEMORY_START] sub mstore
@@ -152,96 +21,112 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     INIT_JUMPTABLE()
     CONTINUE()
 
-
-
-// =====================================================================================================================
-
     notimplemented:
-        // console.log('not implemented:')
-        0x6e6f7420696d706c656d656e7465643a00000000000000000000000000000000
-        0x10
-        CONSOLE_LOG()
-        CONSOLE_LOG_UINT() // log opcode
 
     op_stop:
         stop
         CONTINUE()
+
     op_add:
         add
-
         CONTINUE()
+
     op_mul:
         mul
         CONTINUE()
+
     op_sub:
         sub
         CONTINUE()
+
     op_div:
         div
         CONTINUE()
+
     op_sdiv:
         sdiv
         CONTINUE()
+
     op_mod:
         mod
         CONTINUE()
+
     op_smod:
         smod
         CONTINUE()
+
     op_addmod:
         addmod
         CONTINUE()
+
     op_mulmod:
         mulmod
         CONTINUE()
+
     op_exp:
         exp
         CONTINUE()
+
     op_signextend:
         signextend
         CONTINUE()
+
     op_lt:
         lt
         CONTINUE()
+
     op_gt:
         gt
         CONTINUE()
+
     op_slt:
         slt
         CONTINUE()
+
     op_sgt:
         sgt
         CONTINUE()
+
     op_eq:
         eq
         CONTINUE()
+
     op_iszero:
         iszero
         CONTINUE()
+
     op_and:
         and
         CONTINUE()
+
     op_or:
         or
         CONTINUE()
+
     op_xor:
         xor
         CONTINUE()
+
     op_not:
         not
         CONTINUE()
+
     op_byte:
         byte
         CONTINUE()
+
     op_shl:
         shl
         CONTINUE()
+
     op_shr:
         shr
         CONTINUE()
+
     op_sar:
         sar
         CONTINUE()
+
     op_sha3:
         // [offset, size]
 
@@ -250,23 +135,28 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         sha3
         CONTINUE()
+
     op_address:
         address
         CONTINUE()
+
     op_balance:
         balance
         CONTINUE()
+
     op_origin:
         origin
         CONTINUE()
+
     op_caller:
         caller
         CONTINUE()
+
     op_callvalue:
         callvalue
         CONTINUE()
-    op_calldataload:
 
+    op_calldataload:
         // getting calldata is not supported in a vm => load a 0
 
         pop //  remove the index to load (we dont care)
@@ -275,7 +165,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_calldatasize:
-
         // no call data
         0x0
         CONTINUE()
@@ -295,22 +184,18 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         calldatasize // => [calldataSize, destOffset, size]
         swap1//   => [destOffset, calldataSize, size]
 
-
-
         calldatacopy
 
         CONTINUE()
 
     op_codesize:
-
-        // when using HyVM, the code resides in calldata
-        //  => code size is the same as calldata size
+        // When using the HyVM, the code resides in calldata.
+        // Code size is the same as calldata size.
         calldatasize
 
         CONTINUE()
 
     op_codecopy:
-
         // [destOffset, offset, size]
 
         // fix destOffset
@@ -325,9 +210,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_gasprice:
         gasprice
         CONTINUE()
+
     op_extcodesize:
         extcodesize
         CONTINUE()
+
     op_extcodecopy:
         // [address, destOffset, offset, size]
 
@@ -338,9 +225,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         extcodecopy
         CONTINUE()
+
     op_returndatasize:
         returndatasize
         CONTINUE()
+
     op_returndatacopy:
         // [destOffset, offset, size]
 
@@ -349,48 +238,59 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
 
         returndatacopy
         CONTINUE()
+
     op_extcodehash:
         extcodehash
         CONTINUE()
+
     op_blockhash:
         blockhash
         CONTINUE()
+
     op_coinbase:
         coinbase
         CONTINUE()
+
     op_timestamp:
         timestamp
         CONTINUE()
+
     op_number:
         number
         CONTINUE()
+
     op_difficulty:
         difficulty
         CONTINUE()
+
     op_gaslimit:
         gaslimit
         CONTINUE()
+
     op_chainid:
         chainid
         CONTINUE()
+
     op_selfbalance:
         selfbalance
         CONTINUE()
+
     op_basefee:
         basefee
         CONTINUE()
+
     op_pop:
         pop
         CONTINUE()
-    op_mload:
 
+    op_mload:
         // fix the memory offset load from, and execute
         FIX_MEMOFFSET()
         mload
 
         CONTINUE()
-    op_mstore:
 
+    op_mstore:
         // fix the memory offset to store at, and execute
         FIX_MEMOFFSET()
         mstore
@@ -398,22 +298,22 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_mstore8:
-
         // fix the memory offset to store at, and execute
         FIX_MEMOFFSET()
         mstore8
 
         CONTINUE()
+
     op_sload:
         sload
         CONTINUE()
-    op_sstore:
 
+    op_sstore:
         // check can store things here
         CHECK_SSTORE()
-
         sstore
         CONTINUE()
+
     op_jump:
         // [jumpTo]
         // move pointer to location
@@ -425,17 +325,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
         op_jump_fail:
-            // console.log('expecting JUMPDEST opcode')
-            0x657870656374696e67204a554d5044455354206f70636f646500000000000000
-            0x0000000000000000000000000000000000000000000000000000000000000019
-            CONSOLE_LOG()
-
-            // console.log(exec pointer)
-            // console.log(opcode)
-            // [EXEC_POINTER_MSLOT] mload CONSOLE_LOG_UINT() // => [exec pointer]
-            // dup1 0x1 swap1 sub LOAD_OPCODE() CONSOLE_LOG_UINT() pop // console.log(opcode @ ptr - 1)
-            // LOAD_OPCODE() CONSOLE_LOG_UINT() pop // => []
-
             0x00 0x00 revert
 
     op_jumpi:
@@ -446,7 +335,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE() // otherwise, continue
 
     op_pc:
-
         // load pointer, but it has advanced => remove 1
         0x1
         [EXEC_POINTER_MSLOT] mload
@@ -455,7 +343,6 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_msize:
-
         // get hypervisor's reserved memory size
         0x0
         FIX_MEMOFFSET()
@@ -469,9 +356,11 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_gas:
         gas
         CONTINUE()
+
     op_jumpdest:
         // do nothing
         CONTINUE()
+
 
     op_push1:
         0x01
@@ -598,16 +487,10 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         PICK_DATA()
         CONTINUE()
     op_push32:
-        // [EXEC_POINTER_MSLOT] mload calldataload
-        // 0x20 INCREMENT_EXEC_PTR_N()
         0x20
         PICK_DATA()
-        // // console.log('push')
-        // 0x7075736800000000000000000000000000000000000000000000000000000000
-        // 0x0000000000000000000000000000000000000000000000000000000000000004
-        // CONSOLE_LOG()
-        // CONSOLE_LOG_UINT()
         CONTINUE()
+
     op_dup1:
         dup1
         CONTINUE()
@@ -656,6 +539,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_dup16:
         dup16
         CONTINUE()
+
     op_swap1:
         swap1
         CONTINUE()
@@ -704,6 +588,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
     op_swap16:
         swap16
         CONTINUE()
+
     op_log0:
         FIX_MEMOFFSET()
         log0
@@ -724,6 +609,7 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         FIX_MEMOFFSET()
         log4
         CONTINUE()
+
     op_create:
         swap1
         FIX_MEMOFFSET()
@@ -732,113 +618,107 @@ op_create           op_call         op_callcode     op_return   op_delegatecall 
         CONTINUE()
 
     op_call:
+        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
+        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap3
-        FIX_MEMOFFSET()
-        swap3
+        // fix retOffset
+        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - fix retOffset
-        swap5
-        FIX_MEMOFFSET()
-        swap5
+        // check can call
+        CHECK_CALL()        // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_CALL()
-
-
-        call
+        call                // [success]
         CONTINUE()
+
     op_callcode:
+        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
+        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // on host stack, we have [gas address value argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap3
-        FIX_MEMOFFSET()
-        swap3
+        // fix retOffset
+        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - fix retOffset
-        swap5
-        FIX_MEMOFFSET()
-        swap5
+        // check can call
+        CHECK_CALLCODE()    // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_CALLCODE()
-
-        callcode
+        callcode            // [success]
         CONTINUE()
+
     op_return:
-
-        // fix the memory offset to return
-        FIX_MEMOFFSET()
-
-        // execute return
+        // takes         // [retOffset, retSize]
+        // fix retOffset
+        FIX_MEMOFFSET()  // [hyvmRetOffset, retSize]
         return
+
     op_delegatecall:
+        // takes                // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap2                   // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()         // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
+        swap2                   // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // TODO: we could think about also executing the delegatecall code in HyVM, by loading
-        //  the target contract code via extcodecopy, and then running a delegatecall to this contract (hyvm)
-        //  with the target contract's code as calldata, along with the actual calldata
-        //   => then, must think about some kind of interface to detect that this is such call,
-        //    and modify the calldataload, calldatasize and calldatacopy implementations
+        // fix retOffset
+        swap4                   // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()         // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4                   // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap2
-        FIX_MEMOFFSET()
-        swap2
+        // check can call
+        CHECK_DELEGATECALL()    // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - fix retOffset
-        swap4
-        FIX_MEMOFFSET()
-        swap4
-
-        // - check can call
-        CHECK_DELEGATECALL()
-
-        delegatecall
+        delegatecall            // [success]
         CONTINUE()
+
     op_create2:
-        swap1
-        FIX_MEMOFFSET()
-        swap1
-        create2
+        // takes        // [value, offset, size, salt]
+
+        // fix offset
+        swap1           // [offset, value, size, salt]
+        FIX_MEMOFFSET() // [hyvmOffset, value, size, salt]
+        swap1           // [value, hyvmOffset, size, salt]
+        create2         // [success]
         CONTINUE()
 
     op_staticcall:
+        // takes            // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap2               // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, gas, argsSize, retOffset, retSize]
+        swap2               // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
-        // on host stack, we have [gas address argsOffset argsSize retOffset retSize]
-        // - fix argsOffset
-        swap2
-        FIX_MEMOFFSET()
-        swap2
+        // fix retOffset
+        swap4               // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4               // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - fix retOffset
-        swap4
-        FIX_MEMOFFSET()
-        swap4
+        // check can call
+        CHECK_STATICCALL()  // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        // - check can call
-        CHECK_STATICCALL()
-
-        staticcall
+        staticcall          // [success]
         CONTINUE()
+
     op_revert:
-        FIX_MEMOFFSET()
-        revert
+        // takes        // [offset, size]
+        FIX_MEMOFFSET() // [hyvmOffset, size]
+        revert          // [hyvmOffset, size]
         CONTINUE()
+
     op_invalid:
         invalid
         CONTINUE()
+
     selfdestruct:
         // SELFDESTRUCT is not supported by HyVM, for obvious reasons...
         0x00 0x00 revert
-    unused:
-        0x756e6b6e6f776e206f70636f64653a0000000000000000000000000000000000
-        0x000000000000000000000000000000000000000000000000000000000000000f
-        CONSOLE_LOG()
-        CONSOLE_LOG_UINT() // log opcode
-        0x00 0x00 revert
 
+    unused:
+        0x00 0x00 revert
 }

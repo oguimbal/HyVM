@@ -1,0 +1,59 @@
+// SPDX-License-Identifier: Unlicence
+
+/// @title Jumptable Logic
+
+/* -------------------------------------------------------------------------- */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+#define constant JUMPTABLE_MSLOT = 0x20
+
+/* -------------------------------------------------------------------------- */
+/*                                  JUMPTABLE                                 */
+/* -------------------------------------------------------------------------- */
+
+/// @dev All the EVM opcodes
+/// Generated from https://www.evm.codes/
+#define jumptable__packed OPCODES_JUMPTABLE {
+    op_stop             op_add          op_mul          op_sub      op_div          op_sdiv         op_mod          op_smod             op_addmod       op_mulmod       op_exp          op_signextend   unused          unused              unused              unused
+    op_lt               op_gt           op_slt          op_sgt      op_eq           op_iszero       op_and          op_or               op_xor          op_not          op_byte         op_shl          op_shr          op_sar              unused              unused
+    op_sha3             unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    op_address          op_balance      op_origin       op_caller   op_callvalue    op_calldataload op_calldatasize op_calldatacopy     op_codesize     op_codecopy     op_gasprice     op_extcodesize  op_extcodecopy  op_returndatasize   op_returndatacopy   op_extcodehash
+    op_blockhash        op_coinbase     op_timestamp    op_number   op_difficulty   op_gaslimit     op_chainid      op_selfbalance      op_basefee      unused          unused          unused          unused          unused              unused              unused
+    op_pop              op_mload        op_mstore       op_mstore8  op_sload        op_sstore       op_jump         op_jumpi            op_pc           op_msize        op_gas          op_jumpdest     unused          unused              unused              unused
+    op_push1            op_push2        op_push3        op_push4    op_push5        op_push6        op_push7        op_push8            op_push9        op_push10       op_push11       op_push12       op_push13       op_push14           op_push15           op_push16
+    op_push17           op_push18       op_push19       op_push20   op_push21       op_push22       op_push23       op_push24           op_push25       op_push26       op_push27       op_push28       op_push29       op_push30           op_push31           op_push32
+    op_dup1             op_dup2         op_dup3         op_dup4     op_dup5         op_dup6         op_dup7         op_dup8             op_dup9         op_dup10        op_dup11        op_dup12        op_dup13        op_dup14            op_dup15            op_dup16
+    op_swap1            op_swap2        op_swap3        op_swap4    op_swap5        op_swap6        op_swap7        op_swap8            op_swap9        op_swap10       op_swap11       op_swap12       op_swap13       op_swap14           op_swap15           op_swap16
+    op_log0             op_log1         op_log2         op_log3     op_log4         unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    unused              unused          unused          unused      unused          unused          unused          unused              unused          unused          unused          unused          unused          unused              unused              unused
+    op_create           op_call         op_callcode     op_return   op_delegatecall op_create2      unused          unused              unused          unused          op_staticcall   unused          unused          op_revert           op_invalid          selfdestruct
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   MACROS                                   */
+/* -------------------------------------------------------------------------- */
+
+#define macro INIT_JUMPTABLE() = takes(0) returns(0) {
+    __tablesize(OPCODES_JUMPTABLE) __tablestart(OPCODES_JUMPTABLE) [JUMPTABLE_MSLOT] codecopy
+}
+
+#define macro JUMPTABLE_LOCATION() = takes(1) returns (1) {
+    // Takes              // [opcode]
+    // 2 bytes per instruction (jumptable_packed)
+    0x2 mul               // [0x2 * opcode]
+    [JUMPTABLE_MSLOT] add // [memory location in jumptable]
+    mload                 // [code location]
+
+    // only get the first two bytes
+    0xF0 shr              // [opcode jump location]
+}
+
+#define macro JUMP_TO_OPCODE() = takes(1) returns (0) {
+    // Takes             // [opcode]
+    JUMPTABLE_LOCATION() // [opcode jump location]
+    jump                 // []
+}
