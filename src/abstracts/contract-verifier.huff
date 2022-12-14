@@ -205,6 +205,22 @@
     checkcall_success:
 }
 
+ // no reentrency
+ #define macro NON_REENTRANT() = takes (0) returns (0) {
+     [REENTRANT_SSLOT]  // load execution
+     sload        // [lock]
+     iszero       // [is_unlocked]
+     unlocked     // [unlocked_jumpdest]
+     jumpi        // []
+     0x00         // [size]
+     0x00         // [offset, size]
+     revert       // []
+     unlocked:    // []
+     0x01         // [lock_value]
+     [REENTRANT_SSLOT]  // [reentrant_sslot, lock_value]
+     sstore       // []
+ }
+
 /// @dev Revert if the sender is not the owner AND the owner is setted.
 #define macro ONLY_OWNER() = takes(0) returns(0) {
     [OWNER_SSLOT] sload
