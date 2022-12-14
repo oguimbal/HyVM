@@ -21,167 +21,111 @@
     INIT_JUMPTABLE()
     CONTINUE()
 
-    /* ----------------------------- notimplemented ----------------------------- */
-
     notimplemented:
-
-    /* ---------------------------------- STOP ---------------------------------- */
 
     op_stop:
         stop
         CONTINUE()
 
-    /* ----------------------------------- ADD ---------------------------------- */
-
     op_add:
         add
         CONTINUE()
-
-    /* ----------------------------------- MUL ---------------------------------- */
 
     op_mul:
         mul
         CONTINUE()
 
-    /* ----------------------------------- SUB ---------------------------------- */
-
     op_sub:
         sub
         CONTINUE()
-
-    /* ----------------------------------- DIV ---------------------------------- */
 
     op_div:
         div
         CONTINUE()
 
-    /* ---------------------------------- SDIV ---------------------------------- */
-
     op_sdiv:
         sdiv
         CONTINUE()
-
-    /* ----------------------------------- MOD ---------------------------------- */
 
     op_mod:
         mod
         CONTINUE()
 
-    /* ---------------------------------- SMOD ---------------------------------- */
-
     op_smod:
         smod
         CONTINUE()
-
-    /* --------------------------------- ADDMOD --------------------------------- */
 
     op_addmod:
         addmod
         CONTINUE()
 
-    /* --------------------------------- MULMOD --------------------------------- */
-    
     op_mulmod:
         mulmod
         CONTINUE()
-
-    /* ----------------------------------- EXP ---------------------------------- */
 
     op_exp:
         exp
         CONTINUE()
 
-    /* ------------------------------- SIGNEXTEND ------------------------------- */
-
     op_signextend:
         signextend
         CONTINUE()
-
-    /* ----------------------------------- LT ----------------------------------- */
 
     op_lt:
         lt
         CONTINUE()
 
-    /* ----------------------------------- GT ----------------------------------- */
-
     op_gt:
         gt
         CONTINUE()
-
-    /* ----------------------------------- SLT ---------------------------------- */
 
     op_slt:
         slt
         CONTINUE()
 
-    /* ----------------------------------- SGT ---------------------------------- */
-
     op_sgt:
         sgt
         CONTINUE()
-
-    /* ----------------------------------- EQ ----------------------------------- */
 
     op_eq:
         eq
         CONTINUE()
 
-    /* --------------------------------- ISZERO --------------------------------- */
-
     op_iszero:
         iszero
         CONTINUE()
-
-    /* ----------------------------------- AND ---------------------------------- */
 
     op_and:
         and
         CONTINUE()
 
-    /* ----------------------------------- OR ----------------------------------- */
-
     op_or:
         or
         CONTINUE()
-
-    /* ----------------------------------- XOR ---------------------------------- */
 
     op_xor:
         xor
         CONTINUE()
 
-    /* ----------------------------------- NOT ---------------------------------- */
-
     op_not:
         not
         CONTINUE()
 
-    /* ---------------------------------- BYTE ---------------------------------- */
-
     op_byte:
         byte
         CONTINUE()
-        
-    /* ----------------------------------- SHL ---------------------------------- */
 
     op_shl:
         shl
         CONTINUE()
 
-    /* ----------------------------------- SHR ---------------------------------- */
-
     op_shr:
         shr
         CONTINUE()
 
-    /* ----------------------------------- SAR ---------------------------------- */
-
     op_sar:
         sar
         CONTINUE()
-
-    /* ---------------------------------- SHA3 ---------------------------------- */
 
     op_sha3:
         // [offset, size]
@@ -192,37 +136,25 @@
         sha3
         CONTINUE()
 
-    /* --------------------------------- ADDRESS -------------------------------- */
-
     op_address:
         address
         CONTINUE()
-    
-    /* --------------------------------- BALANCE -------------------------------- */
 
     op_balance:
         balance
         CONTINUE()
 
-    /* --------------------------------- ORIGIN --------------------------------- */
-
     op_origin:
         origin
         CONTINUE()
-
-    /* --------------------------------- CALLER --------------------------------- */
 
     op_caller:
         caller
         CONTINUE()
 
-    /* -------------------------------- CALLVALUE ------------------------------- */
-
     op_callvalue:
         callvalue
         CONTINUE()
-
-    /* ------------------------------ CALLDATALOAD ------------------------------ */
 
     op_calldataload:
         // getting calldata is not supported in a vm => load a 0
@@ -232,14 +164,10 @@
 
         CONTINUE()
 
-    /* ------------------------------ CALLDATASIZE ------------------------------ */
-
     op_calldatasize:
         // no call data
         0x0
         CONTINUE()
-
-    /* ------------------------------ CALLDATACOPY ------------------------------ */
 
     op_calldatacopy:
         // [destOffset, offest, size]
@@ -259,8 +187,6 @@
         calldatacopy
 
         CONTINUE()
-        
-    /* -------------------------------- CODESIZE -------------------------------- */
 
     op_codesize:
         // When using the HyVM, the code resides in calldata.
@@ -268,8 +194,6 @@
         calldatasize
 
         CONTINUE()
-
-    /* -------------------------------- CODECOPY -------------------------------- */
 
     op_codecopy:
         // [destOffset, offset, size]
@@ -283,19 +207,13 @@
 
         CONTINUE()
 
-    /* -------------------------------- GASPRICE -------------------------------- */
-
     op_gasprice:
         gasprice
         CONTINUE()
 
-    /* ------------------------------- EXTCODESIZE ------------------------------ */
-
     op_extcodesize:
         extcodesize
         CONTINUE()
-
-    /* ------------------------------- EXTCODECOPY ------------------------------ */
 
     op_extcodecopy:
         // [address, destOffset, offset, size]
@@ -308,13 +226,9 @@
         extcodecopy
         CONTINUE()
 
-    /* ----------------------------- RETURNDATASIZE ----------------------------- */
-
     op_returndatasize:
         returndatasize
         CONTINUE()
-
-    /* ----------------------------- RETURNDATACOPY ----------------------------- */
 
     op_returndatacopy:
         // [destOffset, offset, size]
@@ -325,73 +239,49 @@
         returndatacopy
         CONTINUE()
 
-    /* ------------------------------- EXTCODEHASH ------------------------------ */
-
     op_extcodehash:
         extcodehash
         CONTINUE()
-
-    /* -------------------------------- BLOCKHASH ------------------------------- */
 
     op_blockhash:
         blockhash
         CONTINUE()
 
-    /* -------------------------------- COINBASE -------------------------------- */
-
     op_coinbase:
         coinbase
         CONTINUE()
-
-    /* -------------------------------- TIMESTAMP ------------------------------- */
 
     op_timestamp:
         timestamp
         CONTINUE()
 
-    /* --------------------------------- NUMBER --------------------------------- */
-
     op_number:
         number
         CONTINUE()
-
-    /* ------------------------------- DIFFICULTY ------------------------------- */
 
     op_difficulty:
         difficulty
         CONTINUE()
 
-    /* -------------------------------- GASLIMIT -------------------------------- */
-
     op_gaslimit:
         gaslimit
         CONTINUE()
-
-    /* --------------------------------- CHAINID -------------------------------- */
 
     op_chainid:
         chainid
         CONTINUE()
 
-    /* ------------------------------- SELFBALANCE ------------------------------ */
-
     op_selfbalance:
         selfbalance
         CONTINUE()
-
-    /* --------------------------------- BASEFEE -------------------------------- */
 
     op_basefee:
         basefee
         CONTINUE()
 
-    /* ----------------------------------- POP ---------------------------------- */
-
     op_pop:
         pop
         CONTINUE()
-
-    /* ---------------------------------- MLOAD --------------------------------- */
 
     op_mload:
         // fix the memory offset load from, and execute
@@ -400,16 +290,12 @@
 
         CONTINUE()
 
-    /* --------------------------------- MSTORE --------------------------------- */
-
     op_mstore:
         // fix the memory offset to store at, and execute
         FIX_MEMOFFSET()
         mstore
 
         CONTINUE()
-
-    /* --------------------------------- MSTORE8 -------------------------------- */
 
     op_mstore8:
         // fix the memory offset to store at, and execute
@@ -418,13 +304,9 @@
 
         CONTINUE()
 
-    /* ---------------------------------- SLOAD --------------------------------- */
-
     op_sload:
         sload
         CONTINUE()
-
-    /* --------------------------------- SSTORE --------------------------------- */
 
     op_sstore:
         // check can store things here
@@ -432,8 +314,6 @@
         sstore
         CONTINUE()
 
-    /* ---------------------------------- JUMP ---------------------------------- */
-    
     op_jump:
         // [jumpTo]
         // move pointer to location
@@ -447,16 +327,12 @@
         op_jump_fail:
             0x00 0x00 revert
 
-    /* ---------------------------------- JUMPI --------------------------------- */
-
     op_jumpi:
         // [jumpTo, condition]
         swap1 // get the condition on top => [condition, jumpTo]
         op_jump jumpi // goto jump if condition is ok, with [jumpTo] as stack
         pop // remove [jumpTo] from stack
         CONTINUE() // otherwise, continue
-
-    /* ----------------------------------- PC ----------------------------------- */
 
     op_pc:
         // load pointer, but it has advanced => remove 1
@@ -465,8 +341,6 @@
         sub
 
         CONTINUE()
-
-    /* ---------------------------------- MSIZE --------------------------------- */
 
     op_msize:
         // get hypervisor's reserved memory size
@@ -479,20 +353,14 @@
 
         CONTINUE()
 
-    /* ----------------------------------- GAS ---------------------------------- */
-
     op_gas:
         gas
         CONTINUE()
-    
-    /* -------------------------------- JUMPDEST -------------------------------- */
 
     op_jumpdest:
         // do nothing
         CONTINUE()
 
-    
-    /* ----------------------------- PUSH1 -> PUSH32 ---------------------------- */
 
     op_push1:
         0x01
@@ -622,8 +490,6 @@
         0x20
         PICK_DATA()
         CONTINUE()
-    
-    /* ------------------------------ DUP1 -> DUP16 ----------------------------- */
 
     op_dup1:
         dup1
@@ -674,8 +540,6 @@
         dup16
         CONTINUE()
 
-    /* ----------------------------- SWAP1 -> SWAP16 ---------------------------- */
-
     op_swap1:
         swap1
         CONTINUE()
@@ -725,8 +589,6 @@
         swap16
         CONTINUE()
 
-    /* ------------------------------ LOG0 -> LOG4 ------------------------------ */
-
     op_log0:
         FIX_MEMOFFSET()
         log0
@@ -748,16 +610,12 @@
         log4
         CONTINUE()
 
-    /* --------------------------------- CREATE --------------------------------- */
-
     op_create:
         swap1
         FIX_MEMOFFSET()
         swap1
         create
         CONTINUE()
-
-    /* ---------------------------------- CALL ---------------------------------- */
 
     op_call:
         // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
@@ -777,8 +635,6 @@
         call                // [success]
         CONTINUE()
 
-    /* -------------------------------- CALLCODE -------------------------------- */
-
     op_callcode:
         // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
         // fix argsOffset
@@ -797,15 +653,11 @@
         callcode            // [success]
         CONTINUE()
 
-    /* --------------------------------- RETURN --------------------------------- */
-    
     op_return:
         // takes         // [retOffset, retSize]
         // fix retOffset
         FIX_MEMOFFSET()  // [hyvmRetOffset, retSize]
         return
-
-    /* ------------------------------ DELEGATECALL ------------------------------ */
 
     op_delegatecall:
         // takes                // [gas, address, argsOffset, argsSize, retOffset, retSize]
@@ -825,8 +677,6 @@
         delegatecall            // [success]
         CONTINUE()
 
-    /* --------------------------------- CREATE2 -------------------------------- */
-
     op_create2:
         // takes        // [value, offset, size, salt]
 
@@ -836,8 +686,6 @@
         swap1           // [value, hyvmOffset, size, salt]
         create2         // [success]
         CONTINUE()
-
-    /* ------------------------------- STATICCALL ------------------------------- */
 
     op_staticcall:
         // takes            // [gas, address, argsOffset, argsSize, retOffset, retSize]
@@ -857,27 +705,19 @@
         staticcall          // [success]
         CONTINUE()
 
-    /* --------------------------------- REVERT --------------------------------- */
-
     op_revert:
         // takes        // [offset, size]
         FIX_MEMOFFSET() // [hyvmOffset, size]
         revert          // [hyvmOffset, size]
         CONTINUE()
 
-    /* --------------------------------- INVALID -------------------------------- */
-
     op_invalid:
         invalid
         CONTINUE()
 
-    /* ------------------------------ SELFDESTRUCT ------------------------------ */
-
     selfdestruct:
         // SELFDESTRUCT is not supported by HyVM, for obvious reasons...
         0x00 0x00 revert
-
-    /* --------------------------------- UNUSED --------------------------------- */
 
     unused:
         0x00 0x00 revert
