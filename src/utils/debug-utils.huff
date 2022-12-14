@@ -3,36 +3,38 @@
 // memory reserved
 #define constant DEBUG_MSLOT = 0x220
 
-/// @dev Logs a small string (must fit in a single 256 bits word)
-///      usage example to log "hello":
-///
-/// 1) get encoding via: logStr("hello")))  where:
-///
-///            function logStr(string memory str) public view {
-///                console.log(iToHex(abi.encodePacked(str), 32));
-///                console.log(iToHex(abi.encodePacked(bytes(str).length)));
-///            }
-///            function iToHex(bytes memory buffer) public pure returns (string memory) {
-///                return iToHex(buffer, 0);
-///            }
-///            function iToHex(bytes memory buffer, uint256 padTo) public pure returns (string memory) {
-///                uint256 len = buffer.length > padTo ? buffer.length : padTo;
-///                bytes memory converted = new bytes(len* 2);
-///                bytes memory _base = "0123456789abcdef";
-///                for (uint256 i = 0; i < buffer.length; i++) {
-///                    converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
-///                    converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
-///                }
-///                for (uint256 i = buffer.length * 2; i < padTo * 2; i++) {
-///                    converted[i] = '0';
-///                }
-///                return string(abi.encodePacked("0x", converted));
-///            }
-///
-/// 2) push encoded logged values, and call macro
-///     0x68656c6c6f000000000000000000000000000000000000000000000000000000
-///     0x5
-///     CONSOLE_LOG()
+
+/*
+ logs a small string (must fit in a single 256 bits word)
+ usage example to log "hello":
+ 1) get encoding via: logStr("hello")))  where:
+
+            function logStr(string memory str) public view {
+                console.log(iToHex(abi.encodePacked(str), 32));
+                console.log(iToHex(abi.encodePacked(bytes(str).length)));
+            }
+            function iToHex(bytes memory buffer) public pure returns (string memory) {
+                return iToHex(buffer, 0);
+            }
+            function iToHex(bytes memory buffer, uint256 padTo) public pure returns (string memory) {
+                uint256 len = buffer.length > padTo ? buffer.length : padTo;
+                bytes memory converted = new bytes(len* 2);
+                bytes memory _base = "0123456789abcdef";
+                for (uint256 i = 0; i < buffer.length; i++) {
+                    converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
+                    converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
+                }
+                for (uint256 i = buffer.length * 2; i < padTo * 2; i++) {
+                    converted[i] = '0';
+                }
+                return string(abi.encodePacked("0x", converted));
+            }
+
+ 2) push encoded logged values, and call macro
+     0x68656c6c6f000000000000000000000000000000000000000000000000000000
+     0x5
+     CONSOLE_LOG()
+*/
 #define macro CONSOLE_LOG() = takes(2) returns (0) {
     // see implementation of foundry console.log(string)
     //  at https://github.com/foundry-rs/foundry/blob/master/testdata/logs/console.sol
@@ -44,28 +46,30 @@
     //   0000000000000000000000000000000000000000000000000000000000000005 string len
     //   68656c6c6f000000000000000000000000000000000000000000000000000000 string data
 
-    //  FYI, to replicate this in solidity/yul...
-    //  - The easy version:
-    //          bytes memory payload = abi.encodeWithSignature("log(string)", "hello");
-    //          // or: bytes memory payload = hex'41304fac0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000';
-    //          uint256 payloadLength = payload.length;
-    //          address consoleAddress = address(0x000000000000000000636F6e736F6c652e6c6f67);
-    //          /// @solidity memory-safe-assembly
-    //          assembly {
-    //              let payloadStart := add(payload, 32)
-    //              let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
-    //          }
+   /*
+        FYI, to replicate this in solidity/yul...
+        - The easy version:
+                bytes memory payload = abi.encodeWithSignature("log(string)", "hello");
+                // or: bytes memory payload = hex'41304fac0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000';
+                uint256 payloadLength = payload.length;
+                address consoleAddress = address(0x000000000000000000636F6e736F6c652e6c6f67);
+                /// @solidity memory-safe-assembly
+                assembly {
+                    let payloadStart := add(payload, 32)
+                    let r := staticcall(gas(), consoleAddress, payloadStart, payloadLength, 0, 0)
+                }
 
 
-    //  - Or the full assembly version:
-    //          assembly {
-    //              let loc:=0xa0
-    //              mstore(loc, 0x41304fac00000000000000000000000000000000000000000000000000000000)
-    //              mstore(add(loc, 4), 0x20) // header
-    //              mstore(add(add(loc, 4), 0x20), 0x5) // string len
-    //              mstore(add(add(loc, 4), 0x40), 0x68656c6c6f000000000000000000000000000000000000000000000000000000)
-    //              let r := staticcall(gas(), 0x000000000000000000636F6e736F6c652e6c6f67, loc, 100, 0, 0)
-    //          }
+        - Or the full assembly version:
+                assembly {
+                    let loc:=0xa0
+                    mstore(loc, 0x41304fac00000000000000000000000000000000000000000000000000000000)
+                    mstore(add(loc, 4), 0x20) // header
+                    mstore(add(add(loc, 4), 0x20), 0x5) // string len
+                    mstore(add(add(loc, 4), 0x40), 0x68656c6c6f000000000000000000000000000000000000000000000000000000)
+                    let r := staticcall(gas(), 0x000000000000000000636F6e736F6c652e6c6f67, loc, 100, 0, 0)
+                }
+    */
 
     //  => We're gonna replicate this behaviour here:
 
