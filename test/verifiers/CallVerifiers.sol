@@ -2,7 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "./IHyVMCallVerifier.sol";
-import "../Utils.sol";
+import {Utils} from "../utils/Utils.sol";
+import "forge-std/console.sol";
 
 contract VerifyAllCalls is IHyVMCallVerifier {
     function verifyCall(

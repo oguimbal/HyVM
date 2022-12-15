@@ -2,10 +2,8 @@
 pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "./Utils.sol";
 
-import "./calls/IERC20.sol";
+import {IERC20} from "./utils/interfaces/IERC20.sol";
 
 import "./calls/DoubleSwap.sol";
 import "./calls/CallHyvm.sol";
@@ -13,7 +11,7 @@ import "./calls/CallHyvm.sol";
 import "./calls/SupplyBorrowMorpho.sol";
 import "./calls/DepositBorrowAave.sol";
 
-import "./Utils.sol";
+import {Utils} from "./utils/Utils.sol";
 import "./ConstantsEthereum.sol";
 
 import "./ILens.sol";
