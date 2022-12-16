@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import {IUniswapV2Router01} from "../../utils/interfaces/IUniswapV2Router01.sol";
-import {IERC20} from "../../utils/interfaces/IERC20.sol";
+import {IUniswapV2Router01} from "../../../utils/interfaces/IUniswapV2Router01.sol";
+import {IERC20} from "../../../utils/interfaces/IERC20.sol";
 
 /// @dev This contract has a constructor that is at the 
 ///      limit of the allowed compilation time stack size

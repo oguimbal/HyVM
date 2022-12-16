@@ -3,12 +3,12 @@ pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
-import "../calls/CallHyvm.sol";
+import {CallHyvm} from "../calls/CallHyvm.sol";
 
-import {IERC20} from "../utils/interfaces/IERC20.sol";
-import {IUniswapV2Router01} from "../utils/interfaces/IUniswapV2Router01.sol";
+import {IERC20} from "../../utils/interfaces/IERC20.sol";
+import {IUniswapV2Router01} from "../../utils/interfaces/IUniswapV2Router01.sol";
 
-import "test/calls/limitTesting/MaximumStackSize_hyvm.sol";
+import {AbsurdDeclaration} from "../calls/limitTesting/MaximumStackSize_hyvm.sol";
 
 contract LimitSwapsTest is Test {
     address hyvm;
