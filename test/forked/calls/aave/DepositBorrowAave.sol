@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import {IERC20} from "./../../utils/interfaces/IERC20.sol";
-import "./ILendingPool.sol";
-import "../ConstantsEthereum.sol";
+import {IERC20} from "./../../../utils/interfaces/IERC20.sol";
+import {aUSDC, DAI, USDC} from "../../ConstantsEthereum.sol";
+
+import {ILendingPool} from "./ILendingPool.sol";
 
 contract DepositBorrowAave {
     ILendingPool private constant lendingPool = ILendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);

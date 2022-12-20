@@ -2,11 +2,13 @@
 pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
+
 import {Utils} from "../utils/Utils.sol";
-import "./calls/CallHyvm.sol";
-import "./calls/GMXLong.sol";
-import "./calls/IGMX.sol";
-import "./ConstantsArbitrum.sol";
+import {USDC} from "./ConstantsArbitrum.sol";
+
+import {CallHyvm} from "./calls/CallHyvm.sol";
+import {GMXLong} from "./calls/GMX/GMXLong.sol";
+import {IGMXPositionRouter, IGMXRouter} from "./calls/GMX/IGMX.sol";
 
 contract GMXTest is Test {
     address hyvm;

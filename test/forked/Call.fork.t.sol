@@ -3,18 +3,17 @@ pragma solidity ^0.8.13;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
+import {DepositBorrowAave} from "./calls/aave/DepositBorrowAave.sol";
+import {ILendingPool} from "./calls/aave/ILendingPool.sol";
+import {DoubleSwap} from "./calls/doubleSwap/DoubleSwap.sol";
+import {ILens} from "./calls/morpho/ILens.sol";
+import {SupplyBorrowMorpho} from "./calls/morpho/SupplyBorrowMorpho.sol";
+
+import {CallHyvm} from "./calls/CallHyvm.sol";
+
 import {IERC20} from "../utils/interfaces/IERC20.sol";
-
-import "./calls/DoubleSwap.sol";
-import "./calls/CallHyvm.sol";
-
-import "./calls/SupplyBorrowMorpho.sol";
-import "./calls/DepositBorrowAave.sol";
-
 import {Utils} from "../utils/Utils.sol";
-import "./ConstantsEthereum.sol";
-
-import "./ILens.sol";
+import {cDAI, cUSDC, DAI, USDC} from "./ConstantsEthereum.sol";
 
 contract CallForkTests is Test {
     address hyvm;
@@ -37,7 +36,7 @@ contract CallForkTests is Test {
         vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
         hyvm = HuffDeployer.deploy("HyVM");
-        doubleSwapHuff = HuffDeployer.deploy("../test/forked/calls/DoubleSwap");
+        doubleSwapHuff = HuffDeployer.deploy("../test/forked/calls/doubleSwap/DoubleSwap");
         doubleSwap = new DoubleSwap();
         callHyvm = new CallHyvm();
 
