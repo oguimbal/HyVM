@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
@@ -8,7 +9,7 @@ import {USDC} from "./ConstantsArbitrum.sol";
 
 import {CallHyvm} from "./calls/CallHyvm.sol";
 import {GMXLong} from "./calls/GMX/GMXLong.sol";
-import {IGMXPositionRouter, IGMXRouter} from "./calls/GMX/IGMX.sol";
+import {IGMXPositionRouter} from "./calls/GMX/IGMX.sol";
 
 contract GMXTest is Test {
     address hyvm;
@@ -19,13 +20,9 @@ contract GMXTest is Test {
     GMXLong gmxLong;
     bytes gmxLongHyvmBytecode;
     // PositionRouter
-    IGMXPositionRouter positionRouter = IGMXPositionRouter(
-            0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868
-        );
+    IGMXPositionRouter positionRouter = IGMXPositionRouter(0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868);
     // Admin of the Position Router
-    address positionRouterAdmin = address(
-        0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8
-    );
+    address positionRouterAdmin = address(0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8);
 
     //  =====   Set up  =====
     function setUp() public {
@@ -41,8 +38,8 @@ contract GMXTest is Test {
 
     function testGMXLongNative() public {
         // Deal USDC and ETH to contract that will open a long position
-        deal(USDC, address(gmxLong), 1000000000 * 10**6);
-        deal(address(gmxLong), 1000000000 * 10**18);
+        deal(USDC, address(gmxLong), 1000000000 * 10 ** 6);
+        deal(address(gmxLong), 1000000000 * 10 ** 18);
         // opens long position
         gmxLong.gmxLong();
         // Keeper that will execute the requests
@@ -54,10 +51,7 @@ contract GMXTest is Test {
         // Execute transaction
         // The transaction is identified by a requestKey
         changePrank(keeper);
-        bytes32 key = positionRouter.getRequestKey(
-            address(gmxLong),
-            uint256(1)
-        );
+        bytes32 key = positionRouter.getRequestKey(address(gmxLong), uint256(1));
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
@@ -65,14 +59,10 @@ contract GMXTest is Test {
 
     function testGMXLongHyvm() public {
         // Deal USDC and ETH to contract that will open a long position
-        deal(USDC, address(callHyvm), 1000000000 * 10**6);
-        deal(address(callHyvm), 1000000000 * 10**18);
+        deal(USDC, address(callHyvm), 1000000000 * 10 ** 6);
+        deal(address(callHyvm), 1000000000 * 10 ** 18);
         // replace "gmxLong" selector and bypass calldata size check
-        bytes memory finalBytecode = Utils
-            .replaceSelectorBypassCalldataSizeCheck(
-                gmxLongHyvmBytecode,
-                hex"9507c78f"
-            );
+        bytes memory finalBytecode = Utils.replaceSelectorBypassCalldataSizeCheck(gmxLongHyvmBytecode, hex"9507c78f");
         // CallHyvm
         callHyvm.callHyvm(hyvm, finalBytecode);
         // Keeper that will execute the requests
@@ -84,10 +74,7 @@ contract GMXTest is Test {
         // Execute transaction
         // The transaction is identified by a requestKey
         changePrank(keeper);
-        bytes32 key = positionRouter.getRequestKey(
-            address(callHyvm),
-            uint256(1)
-        );
+        bytes32 key = positionRouter.getRequestKey(address(callHyvm), uint256(1));
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
