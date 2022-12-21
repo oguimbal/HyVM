@@ -7,9 +7,8 @@ import {cDAI, cUSDC, DAI, USDC} from "../../ConstantsEthereum.sol";
 import {IMorpho} from "./IMorpho.sol";
 
 contract SupplyBorrowMorpho {
-    IMorpho private constant morpho =
-        IMorpho(0x8888882f8f843896699869179fB6E4f7e3B58888);
-    uint256 private constant amountDAI = 1_000 * 10**18;
+    IMorpho private constant morpho = IMorpho(0x8888882f8f843896699869179fB6E4f7e3B58888);
+    uint256 private constant amountDAI = 1_000 * 10 ** 18;
 
     constructor() {}
 
@@ -31,10 +30,10 @@ contract SupplyBorrowMorpho {
         // balance USDC before
         uint256 USDCBalanceBefore = IERC20(USDC).balanceOf(address(this));
         // borrow 10 USDC
-        morpho.borrow(cUSDC, 10 * 10**6);
+        morpho.borrow(cUSDC, 10 * 10 ** 6);
         // balance after borrow
         uint256 USDCBalanceAfter = IERC20(USDC).balanceOf(address(this));
         // check borrowed amount
-        require(USDCBalanceAfter - USDCBalanceBefore >= 98 * 10**5);
+        require(USDCBalanceAfter - USDCBalanceBefore >= 98 * 10 ** 5);
     }
 }

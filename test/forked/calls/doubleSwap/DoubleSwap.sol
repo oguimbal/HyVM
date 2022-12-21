@@ -10,11 +10,12 @@ contract DoubleSwap {
     address private constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     IUniswapV2Router01 private constant uniswapRouter = IUniswapV2Router01(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     uint256 private constant amountUSDC = 100_000_000;
-    constructor(){}
+
+    constructor() {}
 
     function doubleSwap() public {
         uint256 balance = IERC20(USDC).balanceOf(address(this));
-        require(balance >= amountUSDC, 'Not enough $');
+        require(balance >= amountUSDC, "Not enough $");
         IERC20(USDC).approve(address(uniswapRouter), type(uint256).max);
         uint256 ethBalanceBefore = address(this).balance;
         address[] memory path = new address[](2);

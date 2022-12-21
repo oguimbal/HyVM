@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
@@ -13,13 +14,13 @@ contract Looper {
         byteCode = _byteCode;
     }
 
-    function loop(uint256 i) public returns (uint256){
-        uint256 j = i+1;
+    function loop(uint256 i) public returns (uint256) {
+        uint256 j = i + 1;
 
         bytes memory fullByteCode = abi.encodePacked(byteCode, abi.encode(address(this)), j);
 
-        (bool success, ) = hyvm.call(fullByteCode);
-        require(success, 'Failed to call HyVM');
+        (bool success,) = hyvm.call(fullByteCode);
+        require(success, "Failed to call HyVM");
 
         return j;
     }

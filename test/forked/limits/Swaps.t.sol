@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
@@ -10,7 +11,6 @@ import {IUniswapV2Router01} from "../../utils/interfaces/IUniswapV2Router01.sol"
 
 import {MultipleSwap} from "../calls/limitTesting/MultipleInlineSwaps_hyvm.sol";
 import {MultipleLoopedSwap} from "../calls/limitTesting/MultipleLoopedSwaps_hyvm.sol";
-
 
 contract LimitSwapsTest is Test {
     address hyvm;
@@ -30,9 +30,7 @@ contract LimitSwapsTest is Test {
 
     //  =====   Set up  =====
     function setUp() public {
-        vm.createSelectFork(
-            vm.rpcUrl('eth')
-        );
+        vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
         hyvm = HuffDeployer.deploy("HyVM");
         callHyvm = new CallHyvm();
@@ -56,7 +54,7 @@ contract LimitSwapsTest is Test {
 
         callHyvm.callHyvm(hyvm, multipleInlineSwapHyvmBytecode);
     }
-    
+
     function testMultipleLoopedSwaps1() public {
         deal(USDC, address(callHyvm), type(uint16).max);
         deal(USDC, address(this), type(uint16).max);
@@ -82,7 +80,7 @@ contract LimitSwapsTest is Test {
         deal(USDC, address(callHyvm), type(uint256).max);
         deal(USDC, address(this), type(uint256).max);
 
-        // Call fail because convert uint256.max USDC for ETH, it thorw a 
+        // Call fail because convert uint256.max USDC for ETH, it thorw a
         //     => "ds-math-mul-overflow" during the swap
         vm.expectRevert("Failed to call HyVM");
         callHyvm.callHyvm(hyvm, multipleLoopedSwapHyvmBytecode);

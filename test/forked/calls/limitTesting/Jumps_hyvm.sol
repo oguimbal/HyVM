@@ -15,50 +15,48 @@ contract Jumps {
         function2();
     }
 
-    function function1() private view returns (uint256) {   
-        if(number % 10 == 0){
+    function function1() private view returns (uint256) {
+        if (number % 10 == 0) {
             return 1;
-        }
-        else{
+        } else {
             return 0;
         }
     }
 
-    function function2() private returns (uint256 x) {        
+    function function2() private returns (uint256 x) {
         unchecked {
             ++number;
         }
 
         x = number;
 
-        if(x == 0){
+        if (x == 0) {
             return x;
         }
-        if(x == 1){
+        if (x == 1) {
             function1();
         }
-        if(x == 2){
+        if (x == 2) {
             function2();
         }
-        if(x == 3){
+        if (x == 3) {
             function3();
         }
-        if(x == 4){
+        if (x == 4) {
             function4();
         }
-        if(x == 5){
+        if (x == 5) {
             function5();
         }
-        if(x == 6){
+        if (x == 6) {
             function6();
         }
-        if(x == 7){
+        if (x == 7) {
             function7();
         }
-        if(x == 8){
+        if (x == 8) {
             function8();
-        }
-        else{
+        } else {
             x = function1();
         }
     }
