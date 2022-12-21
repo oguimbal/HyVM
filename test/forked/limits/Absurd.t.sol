@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
@@ -18,9 +19,7 @@ contract LimitSwapsTest is Test {
 
     //  =====   Set up  =====
     function setUp() public {
-        vm.createSelectFork(
-            vm.rpcUrl('eth')
-        );
+        vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
         hyvm = HuffDeployer.deploy("HyVM");
         callHyvm = new CallHyvm();
@@ -30,52 +29,51 @@ contract LimitSwapsTest is Test {
 
     function testMaximumStackSizeHyvm1() public {
         // This call works
-        callHyvm.callHyvm(hyvm, abi.encode(
-            maximumStackSizeHyvmBytecode
-        ));
+        callHyvm.callHyvm(hyvm, abi.encode(maximumStackSizeHyvmBytecode));
         // This call works
-        callHyvm.callHyvm(hyvm, abi.encode(
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode
-        ));
+        callHyvm.callHyvm(hyvm, abi.encode(maximumStackSizeHyvmBytecode, maximumStackSizeHyvmBytecode));
         // This call works
-        callHyvm.callHyvm(hyvm, abi.encode(
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode
-        ));
+        callHyvm.callHyvm(
+            hyvm, abi.encode(maximumStackSizeHyvmBytecode, maximumStackSizeHyvmBytecode, maximumStackSizeHyvmBytecode)
+        );
         // This call works
-        callHyvm.callHyvm(hyvm, abi.encode(
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode
-        ));
+        callHyvm.callHyvm(
+            hyvm,
+            abi.encode(
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode
+            )
+        );
         // This call works, but one more and this file can't
         // be compiled => "Stack too deep."
-        callHyvm.callHyvm(hyvm, abi.encode(
-            maximumStackSizeHyvmBytecode, 
-            maximumStackSizeHyvmBytecode, 
-            maximumStackSizeHyvmBytecode, 
-            maximumStackSizeHyvmBytecode, 
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode,
-            maximumStackSizeHyvmBytecode
-        ));
+        callHyvm.callHyvm(
+            hyvm,
+            abi.encode(
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode,
+                maximumStackSizeHyvmBytecode
+            )
+        );
     }
 
     // This test can't be compiled because of the stack size
     // function testMaximumStackSizeHyvm2() public {
     //     callHyvm.callHyvm(hyvm, abi.encode(
-    //         maximumStackSizeHyvmBytecode, 
-    //         maximumStackSizeHyvmBytecode, 
-    //         maximumStackSizeHyvmBytecode, 
-    //         maximumStackSizeHyvmBytecode, 
+    //         maximumStackSizeHyvmBytecode,
+    //         maximumStackSizeHyvmBytecode,
+    //         maximumStackSizeHyvmBytecode,
+    //         maximumStackSizeHyvmBytecode,
     //         maximumStackSizeHyvmBytecode,
     //         maximumStackSizeHyvmBytecode,
     //         maximumStackSizeHyvmBytecode,

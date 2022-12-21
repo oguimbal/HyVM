@@ -13,10 +13,10 @@ contract MultipleSwap {
 
     IUniswapV2Router01 private constant uniswapRouter = IUniswapV2Router01(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     uint256 private amountUSDC = 100_000_000;
-    
+
     constructor() {
         uint256 balance = IERC20(USDC).balanceOf(address(this));
-        require(balance >= amountUSDC, 'Not enough $');
+        require(balance >= amountUSDC, "Not enough $");
         IERC20(USDC).approve(address(uniswapRouter), type(uint256).max);
         IERC20(DAI).approve(address(uniswapRouter), type(uint256).max);
         IERC20(WBTC).approve(address(uniswapRouter), type(uint256).max);
@@ -33,7 +33,9 @@ contract MultipleSwap {
         // ETH to DAI
         path[0] = WETH;
         path[1] = DAI;
-        uniswapRouter.swapExactETHForTokens{value: address(this).balance - ethBalanceBefore}(0, path, address(this), block.timestamp);
+        uniswapRouter.swapExactETHForTokens{value: address(this).balance - ethBalanceBefore}(
+            0, path, address(this), block.timestamp
+        );
 
         // DAI to WBTC
         uint256 amountDAI = IERC20(DAI).balanceOf(address(this));
@@ -108,7 +110,9 @@ contract MultipleSwap {
         // ETH to DAI
         path[0] = WETH;
         path[1] = DAI;
-        uniswapRouter.swapExactETHForTokens{value: address(this).balance - ethBalanceBefore}(0, path, address(this), block.timestamp);
+        uniswapRouter.swapExactETHForTokens{value: address(this).balance - ethBalanceBefore}(
+            0, path, address(this), block.timestamp
+        );
 
         // DAI to WBTC
         amountDAI = IERC20(DAI).balanceOf(address(this));
@@ -117,7 +121,7 @@ contract MultipleSwap {
         uniswapRouter.swapExactTokensForTokens(amountDAI, 0, path, address(this), block.timestamp);
 
         require(IERC20(WBTC).balanceOf(address(this)) != 0);
-        
+
         require(IERC20(WETH).balanceOf(address(this)) == 0);
         require(IERC20(AAVE).balanceOf(address(this)) == 0);
         require(IERC20(USDC).balanceOf(address(this)) == 0);

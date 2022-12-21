@@ -64,22 +64,12 @@ contract OnlyAllowExchengesWith is IHyVMCallVerifier {
         bytes memory balanceOfSig = hex"70a08231";
 
         // check that this call starts with the balanceOf() or transfer() selector
-        (bool success, uint256 index) = Utils.indexOf(
-            callDataSlice,
-            balanceOfSig,
-            0
-        );
+        (bool success, uint256 index) = Utils.indexOf(callDataSlice, balanceOfSig, 0);
         if (!success || index != 0) {
             bytes memory transferSig = hex"a9059cbb";
-            (success, index) = Utils.indexOf(
-                callDataSlice,
-                transferSig,
-                0
-            );
+            (success, index) = Utils.indexOf(callDataSlice, transferSig, 0);
             if (!success || index != 0) {
-                console.log(
-                    "Neither balanceOf() nor transfer() selectors found in calldata: "
-                );
+                console.log("Neither balanceOf() nor transfer() selectors found in calldata: ");
                 console.log(Utils.iToHex(callDataSlice));
                 return false;
             }
@@ -91,11 +81,7 @@ contract OnlyAllowExchengesWith is IHyVMCallVerifier {
         }
 
         // find index of the given address
-        (success, index) = Utils.indexOf(
-            callDataSlice,
-            abi.encodePacked(_user),
-            4
-        );
+        (success, index) = Utils.indexOf(callDataSlice, abi.encodePacked(_user), 4);
         if (!success || index != 4) {
             console.log("Given address not found in calldata: ");
             console.log(Utils.iToHex(callDataSlice));

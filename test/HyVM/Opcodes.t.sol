@@ -17,7 +17,6 @@ contract OpcodesTest is Test {
         hyvm = HuffDeployer.deploy("HyVM");
     }
 
-
     // =============== UTILITIES =================
 
     function logStr(string memory str) public view {
@@ -27,25 +26,19 @@ contract OpcodesTest is Test {
 
     // just a test that shows what to write in HyVM.huff to console.log something.
     function testGenerate() public view {
-        logStr('no call verifier set');
+        logStr("no call verifier set");
     }
-
-
-
 
     // =================== TESTS ==============
 
     function testPushReturnMstore() public {
         // bytecode generated using: easm test/opcodes/push
         // ... which is 3+4
-        (bool success, bytes memory data) = hyvm.delegatecall(
-            hex"7fff0100000000000000000000000000000000000000000000000000000000000060005260026000f3"
-        );
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7fff0100000000000000000000000000000000000000000000000000000000000060005260026000f3");
         assertEq(success, true);
-        assertEq(data, hex'ff01');
+        assertEq(data, hex"ff01");
     }
-
-
 
     function testAdd() public {
         // bytecode generated using: easm test/opcodes/add
@@ -126,7 +119,6 @@ contract OpcodesTest is Test {
         assertEq(result, 4);
     }
 
-
     function testExp() public {
         // bytecode generated using: easm test/opcodes/exp
         (bool success, bytes memory data) = hyvm.delegatecall(hex"6002600a0a60005260ff6000f3");
@@ -159,7 +151,6 @@ contract OpcodesTest is Test {
         assertEq(result, 0);
     }
 
-
     function testGt1() public {
         // bytecode generated using: easm test/opcodes/gt-1
         (bool success, bytes memory data) = hyvm.delegatecall(hex"600960101160005260ff6000f3");
@@ -178,7 +169,9 @@ contract OpcodesTest is Test {
 
     function testSlt1() public {
         // bytecode generated using: easm test/opcodes/slt-1
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"60097fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1260005260ff6000f3");
+        (bool success, bytes memory data) = hyvm.delegatecall(
+            hex"60097fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1260005260ff6000f3"
+        );
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 1);
@@ -192,10 +185,11 @@ contract OpcodesTest is Test {
         assertEq(result, 0);
     }
 
-
     function testSgt1() public {
         // bytecode generated using: easm test/opcodes/sgt-1
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60091360005260ff6000f3");
+        (bool success, bytes memory data) = hyvm.delegatecall(
+            hex"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60091360005260ff6000f3"
+        );
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 1);
@@ -208,7 +202,6 @@ contract OpcodesTest is Test {
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0);
     }
-
 
     function testEq1() public {
         // bytecode generated using: easm test/opcodes/eq-1
@@ -226,7 +219,6 @@ contract OpcodesTest is Test {
         assertEq(result, 0);
     }
 
-
     function testIsZero1() public {
         // bytecode generated using: easm test/opcodes/iszero-1
         (bool success, bytes memory data) = hyvm.delegatecall(hex"60101560005260ff6000f3");
@@ -243,8 +235,6 @@ contract OpcodesTest is Test {
         assertEq(result, 1);
     }
 
-
-
     function testAnd1() public {
         // bytecode generated using: easm test/opcodes/and-1
         (bool success, bytes memory data) = hyvm.delegatecall(hex"600f600f1660005260ff6000f3");
@@ -260,7 +250,6 @@ contract OpcodesTest is Test {
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0);
     }
-
 
     function testOr1() public {
         // bytecode generated using: easm test/opcodes/or-1
@@ -344,12 +333,13 @@ contract OpcodesTest is Test {
 
     function testSha3() public {
         // bytecode generated using: easm test/opcodes/sha3
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7fffffffff00000000000000000000000000000000000000000000000000000000600052600460002060005260ff6000f3");
+        (bool success, bytes memory data) = hyvm.delegatecall(
+            hex"7fffffffff00000000000000000000000000000000000000000000000000000000600052600460002060005260ff6000f3"
+        );
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0x29045a592007d0c246ef02c2223570da9522d0cf0f73282c79a1bc8f0bb2c238);
     }
-
 
     function testAddress_delegatecall() public {
         // bytecode generated using: easm test/opcodes/address
@@ -374,7 +364,6 @@ contract OpcodesTest is Test {
         address result = abi.decode(data, (address));
         assertEq(result, hyvm);
     }
-
 
     function testBalance() public {
         // bytecode generated using: easm test/opcodes/balance
@@ -439,7 +428,6 @@ contract OpcodesTest is Test {
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0);
     }
-
 
     function testPc1() public {
         // bytecode generated using: easm test/opcodes/pc-1
@@ -628,7 +616,8 @@ contract OpcodesTest is Test {
 
     function testPush18() public {
         // bytecode generated using: easm test/opcodes/push18
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"71ffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"71ffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffff);
@@ -636,7 +625,8 @@ contract OpcodesTest is Test {
 
     function testPush19() public {
         // bytecode generated using: easm test/opcodes/push19
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"72ffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"72ffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffff);
@@ -644,7 +634,8 @@ contract OpcodesTest is Test {
 
     function testPush20() public {
         // bytecode generated using: easm test/opcodes/push20
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"73ffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"73ffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0x00ffffffffffffffffffffffffffffffffffffffff);
@@ -652,7 +643,8 @@ contract OpcodesTest is Test {
 
     function testPush21() public {
         // bytecode generated using: easm test/opcodes/push21
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"74ffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"74ffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffff);
@@ -660,7 +652,8 @@ contract OpcodesTest is Test {
 
     function testPush22() public {
         // bytecode generated using: easm test/opcodes/push22
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"75ffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"75ffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffff);
@@ -668,7 +661,8 @@ contract OpcodesTest is Test {
 
     function testPush23() public {
         // bytecode generated using: easm test/opcodes/push23
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"76ffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"76ffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffff);
@@ -676,7 +670,8 @@ contract OpcodesTest is Test {
 
     function testPush24() public {
         // bytecode generated using: easm test/opcodes/push24
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"77ffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"77ffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -684,7 +679,8 @@ contract OpcodesTest is Test {
 
     function testPush25() public {
         // bytecode generated using: easm test/opcodes/push25
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"78ffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"78ffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -692,7 +688,8 @@ contract OpcodesTest is Test {
 
     function testPush26() public {
         // bytecode generated using: easm test/opcodes/push26
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"79ffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"79ffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -700,7 +697,8 @@ contract OpcodesTest is Test {
 
     function testPush27() public {
         // bytecode generated using: easm test/opcodes/push27
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7affffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7affffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -708,7 +706,8 @@ contract OpcodesTest is Test {
 
     function testPush28() public {
         // bytecode generated using: easm test/opcodes/push28
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7bffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7bffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -716,7 +715,8 @@ contract OpcodesTest is Test {
 
     function testPush29() public {
         // bytecode generated using: easm test/opcodes/push29
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7cffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7cffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -724,7 +724,8 @@ contract OpcodesTest is Test {
 
     function testPush30() public {
         // bytecode generated using: easm test/opcodes/push30
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -732,7 +733,8 @@ contract OpcodesTest is Test {
 
     function testPush31() public {
         // bytecode generated using: easm test/opcodes/push31
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7effffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -740,7 +742,8 @@ contract OpcodesTest is Test {
 
     function testPush32() public {
         // bytecode generated using: easm test/opcodes/push32
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60005260ff6000f3");
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
         assertEq(result, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
@@ -816,7 +819,8 @@ contract OpcodesTest is Test {
 
     function testDup9() public {
         // bytecode generated using: easm test/opcodes/dup9
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"6008600760066005600460036002600160008860005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"6008600760066005600460036002600160008860005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0x8);
@@ -824,7 +828,8 @@ contract OpcodesTest is Test {
 
     function testDup10() public {
         // bytecode generated using: easm test/opcodes/dup10
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"60096008600760066005600460036002600160008960005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"60096008600760066005600460036002600160008960005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0x9);
@@ -832,7 +837,8 @@ contract OpcodesTest is Test {
 
     function testDup11() public {
         // bytecode generated using: easm test/opcodes/dup11
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600a60096008600760066005600460036002600160008a60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600a60096008600760066005600460036002600160008a60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xa);
@@ -840,7 +846,8 @@ contract OpcodesTest is Test {
 
     function testDup12() public {
         // bytecode generated using: easm test/opcodes/dup12
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600b600a60096008600760066005600460036002600160008b60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600b600a60096008600760066005600460036002600160008b60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xb);
@@ -848,7 +855,8 @@ contract OpcodesTest is Test {
 
     function testDup13() public {
         // bytecode generated using: easm test/opcodes/dup13
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600c600b600a60096008600760066005600460036002600160008c60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600c600b600a60096008600760066005600460036002600160008c60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xc);
@@ -856,7 +864,8 @@ contract OpcodesTest is Test {
 
     function testDup14() public {
         // bytecode generated using: easm test/opcodes/dup14
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600d600c600b600a60096008600760066005600460036002600160008d60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600d600c600b600a60096008600760066005600460036002600160008d60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xd);
@@ -864,7 +873,8 @@ contract OpcodesTest is Test {
 
     function testDup15() public {
         // bytecode generated using: easm test/opcodes/dup15
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600e600d600c600b600a60096008600760066005600460036002600160008e60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600e600d600c600b600a60096008600760066005600460036002600160008e60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xe);
@@ -872,7 +882,8 @@ contract OpcodesTest is Test {
 
     function testDup16() public {
         // bytecode generated using: easm test/opcodes/dup16
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600f600e600d600c600b600a60096008600760066005600460036002600160008f60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600f600e600d600c600b600a60096008600760066005600460036002600160008f60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xf);
@@ -936,7 +947,8 @@ contract OpcodesTest is Test {
 
     function testSwap8() public {
         // bytecode generated using: easm test/opcodes/swap8
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"6009600860076006600560046003600260019760005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"6009600860076006600560046003600260019760005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0x9);
@@ -944,7 +956,8 @@ contract OpcodesTest is Test {
 
     function testSwap9() public {
         // bytecode generated using: easm test/opcodes/swap9
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600a6009600860076006600560046003600260019860005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600a6009600860076006600560046003600260019860005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xa);
@@ -952,7 +965,8 @@ contract OpcodesTest is Test {
 
     function testSwap10() public {
         // bytecode generated using: easm test/opcodes/swap10
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600b600a6009600860076006600560046003600260019960005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600b600a6009600860076006600560046003600260019960005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xb);
@@ -960,7 +974,8 @@ contract OpcodesTest is Test {
 
     function testSwap11() public {
         // bytecode generated using: easm test/opcodes/swap11
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600c600b600a6009600860076006600560046003600260019a60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600c600b600a6009600860076006600560046003600260019a60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xc);
@@ -968,7 +983,8 @@ contract OpcodesTest is Test {
 
     function testSwap12() public {
         // bytecode generated using: easm test/opcodes/swap12
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600d600c600b600a6009600860076006600560046003600260019b60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600d600c600b600a6009600860076006600560046003600260019b60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xd);
@@ -976,7 +992,8 @@ contract OpcodesTest is Test {
 
     function testSwap13() public {
         // bytecode generated using: easm test/opcodes/swap13
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600e600d600c600b600a6009600860076006600560046003600260019c60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600e600d600c600b600a6009600860076006600560046003600260019c60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xe);
@@ -984,7 +1001,8 @@ contract OpcodesTest is Test {
 
     function testSwap14() public {
         // bytecode generated using: easm test/opcodes/swap14
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"600f600e600d600c600b600a6009600860076006600560046003600260019d60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"600f600e600d600c600b600a6009600860076006600560046003600260019d60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0xf);
@@ -992,7 +1010,8 @@ contract OpcodesTest is Test {
 
     function testSwap15() public {
         // bytecode generated using: easm test/opcodes/swap15
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"6010600f600e600d600c600b600a6009600860076006600560046003600260019e60005260ff6000f3");
+        (bool success, bytes memory data) =
+            hyvm.delegatecall(hex"6010600f600e600d600c600b600a6009600860076006600560046003600260019e60005260ff6000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0x10);
@@ -1000,7 +1019,9 @@ contract OpcodesTest is Test {
 
     function testSwap16() public {
         // bytecode generated using: easm test/opcodes/swap16
-        (bool success, bytes memory data) = hyvm.delegatecall(hex"60116001600f600e600d600c600b600a6009600860076006600560046003600260019f60005260ff6000f3");
+        (bool success, bytes memory data) = hyvm.delegatecall(
+            hex"60116001600f600e600d600c600b600a6009600860076006600560046003600260019f60005260ff6000f3"
+        );
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
         assertEq(result, 0x11);
@@ -1014,13 +1035,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/call
-        bytes memory bytecode = hex"60016000526000600060206000600073123123123123123123123123123123123123123161fffff160005260ff6000f3";
+        bytes memory bytecode =
+            hex"60016000526000600060206000600073123123123123123123123123123123123123123161fffff160005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
@@ -1035,13 +1053,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/callFail
-        bytes memory bytecode = hex"6000600060006000600073123123123123123123123123123123123123123161fffff160005260ff6000f3";
+        bytes memory bytecode =
+            hex"6000600060006000600073123123123123123123123123123123123123123161fffff160005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
@@ -1056,13 +1071,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/callcode
-        bytes memory bytecode = hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
+        bytes memory bytecode =
+            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
@@ -1077,13 +1089,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/callcodeFail
-        bytes memory bytecode = hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
+        bytes memory bytecode =
+            hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
@@ -1098,13 +1107,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/callcode
-        bytes memory bytecode = hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
+        bytes memory bytecode =
+            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
@@ -1119,13 +1125,10 @@ contract OpcodesTest is Test {
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/callcodeFail
-        bytes memory bytecode = hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
+        bytes memory bytecode =
+            hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(
-            bytecode,
-            0x1231231231231231231231231231231231231231,
-            calldatacontract
-        );
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         uint256 result = abi.decode(data, (uint256));
@@ -1148,11 +1151,7 @@ contract OpcodesTest is Test {
         // bytecode generated using: easm test/opcodes/create2
         bytes memory cont = hex"7067600054600757fe5b60005260086018f360005260016011600f6000f060005260ff6000f3";
         // we replace create opcode by create2 as EVM-Assembler does not implement it
-        bytes memory bytecode = Utils.replaceFirstOccurenceBytes(
-            cont,
-            hex"f0",
-            hex"f5"
-        );
+        bytes memory bytecode = Utils.replaceFirstOccurenceBytes(cont, hex"f0", hex"f5");
         (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
         assertEq(success, true);
         // It send us back an address
