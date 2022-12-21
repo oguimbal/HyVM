@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import {IERC20} from "../../utils/interfaces/IERC20.sol";
+import {IERC20} from "../../../utils/interfaces/IERC20.sol";
+import {USDC, WETH} from "./../../ConstantsArbitrum.sol";
 
-import "./IGMX.sol";
-
-import "./../ConstantsArbitrum.sol";
+import {IGMXPositionRouter, IGMXRouter} from "./IGMX.sol";
 
 contract GMXLong {
     uint256 private constant amountUSDC = 1000 * 10 ** 6;

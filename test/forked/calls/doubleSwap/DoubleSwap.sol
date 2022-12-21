@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import {IUniswapV2Router01} from "../../utils/interfaces/IUniswapV2Router01.sol";
-import {IERC20} from "../../utils/interfaces/IERC20.sol";
+import {IUniswapV2Router01} from "../../../utils/interfaces/IUniswapV2Router01.sol";
+import {IERC20} from "../../../utils/interfaces/IERC20.sol";
 
 contract DoubleSwap {
     address private constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
