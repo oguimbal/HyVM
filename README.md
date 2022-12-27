@@ -1,4 +1,3 @@
-
 <div align="center">
   <h1>HyVM</h1>
   <img height="60" alt="logo" src="./static/eth.png">
@@ -29,9 +28,9 @@ function execute() public returns (uint256 result) {
 
 ***
 
-## What is an hypervisor?
+## What is a hypervisor?
 
-According to [vmware](https://www.vmware.com/topics/glossary/content/hypervisor.html)...
+According to [vmware](https://www.vmware.com/topics/glossary/content/hypervisor.html)
 
 > A hypervisor, also known as a virtual machine monitor or VMM, is software that creates and runs virtual machines (VMs). A hypervisor allows one host computer to support multiple guest VMs by virtually sharing its resources, such as memory and processing.
 
@@ -42,19 +41,19 @@ In our case, the HyVM allows to run an **EVM on top the EVM** and execute [opcod
 Using the HyVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.
 There is no limit on which interactions that can be created.
 Custom and complex logic with chained calls can be executed by the HyVM opening a lot possibilities.
-Repetive intructions and common ones could also be called as helper contract if needed.
+Repetitive intructions and common ones could also be called as helper contract if needed.
 
 ## Examples of use
 
 ### Static functions / get rid of helpers
-The most straightforward use is for readonly functions... no need to deploy helper contracts to do lots of things !
+The most straightforward use is for readonly functions: no need to deploy helper contracts to do lots of things !
 
 👉 For instance, see [this gist](https://gist.github.com/oguimbal/3cc74f6234a006fd9685333381679657) which demonstrates how to fetch multiple balances on-chain at once.
 
 ### More general use
 
 Another way to use the HyVM is to use it as a library called with delegatecall.
-As shown below, a [Contract Wallet](https://docs.ethhub.io/using-ethereum/wallets/smart-contract-wallets/) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example :
+As shown below, a [contract wallet](https://decommas.io/blog/smart-contract-wallets-explained) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example:
 * Swap multiple assets.
 * Approve & deposit.
 
@@ -124,8 +123,8 @@ You will need:
 * [Huff](https://docs.huff.sh/get-started/installing/)
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
-You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler)
-You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode
+You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler).  
+You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode.
 
 
 ### How to deploy
