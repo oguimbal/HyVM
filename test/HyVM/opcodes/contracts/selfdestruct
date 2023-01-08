@@ -1,0 +1,3 @@
+PUSH20 0x0000000000000000000000000000000000000000
+# SELFDESTRUCT is not implemented by easm
+# we will need to add it manually in bytecode

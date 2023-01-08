@@ -9,7 +9,45 @@
 #include "./abstracts/no-verifier.huff"
 
 /* -------------------------------------------------------------------------- */
-/*                                  FALLBACK                                  */
+/*                                 CONSTRUCTOR                                */
+/* -------------------------------------------------------------------------- */
+
+/// @dev The constructor stores the address of the HyVm at the end of the
+///      runtime bytecode. See op_delegatecall.
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    // store current address of HyVM contract at the end of the runtimecode
+    // memory position
+    // It seems __codesize(CONSTRUCTOR) does not take into account 4 bytes
+    // hence we fix it manually
+    address                   // [address(this)]
+    0x04                      // [0x04, address(this)]
+    __codesize(CONSTRUCTOR)   // [__codesize(CONSTRUCTOR), 0x04, address(this)]
+    add                       // [offset, address(this)]
+    codesize                  // [codesize, offset, address(this)]
+    sub                       // [runtime_size, address(this)]
+    mstore                    // []
+
+    // Copy the runtimecode in memory
+    0x04                      // [0x04]
+    __codesize(CONSTRUCTOR)   // [__codesize(CONSTRUCTOR), 0x04]
+    add                       // [offset]
+    dup1                      // [offset, offset]
+    codesize                  // [codesize, offset, offset]
+    sub                       // [runtime_size, offset]
+    dup1                      // [runtime_size, runtime_size, offset]
+    swap2                     // [offset, runtime_size, runtime_size]
+    0x00                      // [return_offset, offset, runtime_size, runtime_size]
+    codecopy                  // [runtime_size]
+
+    // Add the address at the end to the size, it is right padded
+    0x20                      // [0x20, runtime_size]
+    add                       // [runtime_size + 0x20]
+    0x00                      // [offset, runtime_size + 0x20]
+    return
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 FALLBACK                                   */
 /* -------------------------------------------------------------------------- */
 
 /// @notice Entry point of the HyVM
@@ -660,22 +698,44 @@
         return
 
     op_delegatecall:
-        // takes                // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // takes                    // [gas, address, argsOffset, argsSize, retOffset, retSize]
+
+        // Check if the delegatecall is in the context of a call
+        // We must revert if it is the case as it would open the door to
+        // selfdestruct the HyVM
+
+        // load immutable
+        0x14                        // [sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        0x14                        // [sizeImmutable, sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        codesize                    // [codesize, sizeImmutable, sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        sub                         // [offset, sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        0x0c                        // [0x0c, offset, sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()             // [returnoffset, offset, sizeImmutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        codecopy                    // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        0x0                         // [0x00, gas, address, argsOffset, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()             // [offset, gas, address, argsOffset, argsSize, retOffset, retSize]
+        mload                       // [immutable, gas, address, argsOffset, argsSize, retOffset, retSize]
+        address eq                  // [immutable==address, gas, address, argsOffset, argsSize, retOffset, retSize]
+        wrong_context jumpi         // [gas, address, argsOffset, argsSize, retOffset, retSize]
+
         // fix argsOffset
-        swap2                   // [argsOffset, address, gas, argsSize, retOffset, retSize]
-        FIX_MEMOFFSET()         // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
-        swap2                   // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
+        swap2                       // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()             // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
+        swap2                       // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
         // fix retOffset
-        swap4                   // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
-        FIX_MEMOFFSET()         // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
-        swap4                   // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+        swap4                       // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()             // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4                       // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
         // check can call
-        CHECK_DELEGATECALL()    // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+        CHECK_DELEGATECALL()        // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        delegatecall            // [success]
+        delegatecall                // [success]
         CONTINUE()
+
+    wrong_context:
+        0x00 0x00 revert
 
     op_create2:
         // takes        // [value, offset, size, salt]

@@ -1106,7 +1106,7 @@ contract OpcodesTest is Test {
             mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
             calldatacontract := create(0, 15, 17)
         }
-        // bytecode generated using: easm test/opcodes/callcode
+        // bytecode generated using: easm test/opcodes/delegateCall
         bytes memory bytecode =
             hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
@@ -1124,7 +1124,7 @@ contract OpcodesTest is Test {
             mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
             calldatacontract := create(0, 15, 17)
         }
-        // bytecode generated using: easm test/opcodes/callcodeFail
+        // bytecode generated using: easm test/opcodes/delegateCallFail
         bytes memory bytecode =
             hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
@@ -1159,5 +1159,29 @@ contract OpcodesTest is Test {
         // Let's verify that the code present is callcodeContract bytecode
         bytes memory code = result.code;
         assertEq(code, hex"600054600757fe5b");
+    }
+
+    function testCannotDelegateCallInCallContext() public {
+        address delegatecallToSelfdestruct;
+        address selfdestructContract;
+
+        // bytecode generated using: easm test/opcodes/contracts/delegatecallToSelfdestruct
+        bytes memory bytecode = hex"6000600060006000600073123123123123123123123123123123123123123161fffff4";
+        assembly {
+            // use scratch space
+            mstore(0, bytecode)
+            delegatecallToSelfdestruct := create(0, 0, 35)
+
+            // see opcodes/contracts/selfdestruct
+            // ff opcode (selfdestruct) is appened at the end as easm does not
+            // implement it
+            mstore(0, 0x730000000000000000000000000000000000000000ff) // see opcodes/contracts/selfdestruct
+            selfdestructContract := create(0, 10, 22)
+        }
+        // we replace the dummy address with actual address of selfdestructContract
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, selfdestructContract);
+        vm.expectRevert();
+        (bool success, ) = hyvm.call(bytecode);
+        assertTrue(success, "expectRevert: call did not revert");
     }
 }
