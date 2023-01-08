@@ -9,7 +9,57 @@
 #include "./abstracts/no-verifier.huff"
 
 /* -------------------------------------------------------------------------- */
-/*                                  FALLBACK                                  */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Size of the address of HyVM
+#define constant SELF_ADDRESS_SIZE = 0x14
+
+/// @dev Offset to provide to codecopy when loading the address of the HyVM
+#define constant SELF_ADDRESS_OFFSET = 0x0c
+
+/// @dev Memory slot for VM internal operations
+#define constant KERNEL_MSLOT = 0x220
+
+/* -------------------------------------------------------------------------- */
+/*                                 CONSTRUCTOR                                */
+/* -------------------------------------------------------------------------- */
+
+/// @dev The constructor stores the address of the HyVm at the end of the
+///      runtime bytecode. See op_delegatecall.
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    // store address of HyVM contract at the end of the runtimecode
+    // memory position at construction time.
+    // It seems __codesize(CONSTRUCTOR) does not take into account 2 bytes
+    // hence we fix it manually
+    0x02                      // [0x02]
+    __codesize(CONSTRUCTOR)   // [__codesize(CONSTRUCTOR), 0x02]
+    add                       // [offset]
+    dup1                      // [offset, offset]
+    dup1                      // [offset, offset, offset]
+    address                   // [address(this), offset, offset, offset]
+    swap1                     // [offset, address(this), offset, offset]
+    codesize                  // [codesize, offset, address(this), offset, offset]
+    sub                       // [runtime_size, address(this), offset, offset]
+    mstore                    // [offset, offset]
+
+    // Copy the runtimecode in memory
+    codesize                  // [codesize, offset, offset]
+    sub                       // [runtime_size, offset]
+    dup1                      // [runtime_size, runtime_size, offset]
+    swap2                     // [offset, runtime_size, runtime_size]
+    0x00                      // [return_offset, offset, runtime_size, runtime_size]
+    codecopy                  // [runtime_size]
+
+    // Add the address at the end to the size, it is right padded
+    0x20                      // [0x20, runtime_size]
+    add                       // [runtime_size + 0x20]
+    0x00                      // [offset, runtime_size + 0x20]
+    return
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 FALLBACK                                   */
 /* -------------------------------------------------------------------------- */
 
 /// @notice Entry point of the HyVM
@@ -660,22 +710,46 @@
         return
 
     op_delegatecall:
-        // takes                // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // Check first if the delegatecall is in the context of a call
+        // It must revert if it is the case as it would open the door to
+        // selfdestruct the HyVM.
+
+        // takes                                   // [gas, address, argsOffset, argsSize, retOffset, retSize]
+
+        // Copy address HyVM from end of runtimebytecode
+        0x20                                       // [size, gas, address, argsOffset, argsSize, retOffset, retSize]
+        dup1                                       // [size, size, gas, address, argsOffset, argsSize, retOffset, retSize]
+        codesize                                   // [codesize, size, size, gas, address, argsOffset, argsSize, retOffset, retSize]
+        sub                                        // [offset, size, gas, address, argsOffset, argsSize, retOffset, retSize]
+        [KERNEL_MSLOT]                             // [returnoffset, offset, size, gas, address, argsOffset, argsSize, retOffset, retSize]
+        codecopy                                   // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // load on stack
+        [KERNEL_MSLOT]                             // [KERNEL_MSLOT, gas, address, argsOffset, argsSize, retOffset, retSize]
+        mload                                      // [32 bytes, gas, address, argsOffset, argsSize, retOffset, retSize]
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF // [20 bytes bitmask, 32 bytes, gas, address, argsOffset, argsSize, retOffset, retSize]
+        and                                        // [address(hyvm), gas, address, argsOffset, argsSize, retOffset, retSize]
+        // compare to currently executing account
+        address eq                                 // [address(hyvm)==address(this), gas, address, argsOffset, argsSize, retOffset, retSize]
+        wrong_context jumpi                        // [gas, address, argsOffset, argsSize, retOffset, retSize]
+
         // fix argsOffset
-        swap2                   // [argsOffset, address, gas, argsSize, retOffset, retSize]
-        FIX_MEMOFFSET()         // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
-        swap2                   // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
+        swap2                                      // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()                            // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
+        swap2                                      // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
 
         // fix retOffset
-        swap4                   // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
-        FIX_MEMOFFSET()         // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
-        swap4                   // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+        swap4                                      // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()                            // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4                                      // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
         // check can call
-        CHECK_DELEGATECALL()    // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+        CHECK_DELEGATECALL()                       // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
 
-        delegatecall            // [success]
+        delegatecall                               // [success]
         CONTINUE()
+
+    wrong_context:
+        0x00 0x00 revert
 
     op_create2:
         // takes        // [value, offset, size, salt]

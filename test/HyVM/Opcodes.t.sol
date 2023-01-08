@@ -15,6 +15,7 @@ contract OpcodesTest is Test {
 
     function setUp() public {
         hyvm = HuffDeployer.deploy("HyVM");
+        vm.label(hyvm, "HyVM");
     }
 
     // =============== UTILITIES =================
@@ -1106,7 +1107,7 @@ contract OpcodesTest is Test {
             mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
             calldatacontract := create(0, 15, 17)
         }
-        // bytecode generated using: easm test/opcodes/callcode
+        // bytecode generated using: easm test/opcodes/delegateCall
         bytes memory bytecode =
             hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
@@ -1124,7 +1125,7 @@ contract OpcodesTest is Test {
             mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
             calldatacontract := create(0, 15, 17)
         }
-        // bytecode generated using: easm test/opcodes/callcodeFail
+        // bytecode generated using: easm test/opcodes/delegateCallFail
         bytes memory bytecode =
             hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
         // we replace the dummy address with actual contract address
@@ -1159,5 +1160,29 @@ contract OpcodesTest is Test {
         // Let's verify that the code present is callcodeContract bytecode
         bytes memory code = result.code;
         assertEq(code, hex"600054600757fe5b");
+    }
+
+    function testCannotDelegateCallInCallContext() public {
+        // It is the same test as testDelegateCall.
+        // Only difference is the call to the HyVM instead of a delegatecall.
+        // The bytecode itself contains a delegate that should revert
+        // as it should not be possible to do a delegatecall in the context of a
+        // call to the HyVM. It is not possible to test the specific case of
+        // selfdestruct as it is not supported by foundry
+        // https://github.com/foundry-rs/foundry/issues/2844
+        address calldatacontract;
+        assembly {
+            // use scratch space
+            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
+            calldatacontract := create(0, 15, 17)
+        }
+        // bytecode generated using: easm test/opcodes/delegateCall
+        bytes memory bytecode =
+            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
+        // we replace the dummy address with actual contract address
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
+        vm.expectRevert();
+        (bool success, ) = hyvm.call(bytecode);
+        assertTrue(success, "expectRevert: call did not revert");
     }
 }
