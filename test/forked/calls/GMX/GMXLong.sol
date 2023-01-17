@@ -24,9 +24,9 @@ contract GMXLong {
         positionRouter.createIncreasePosition{value: 3000_000_000_000_000}(
             path, // [tokenIn, collateralToken] _path
             WETH, // _indexToken (token we want to long)
-            100 * 10 ** 6, // _amountIn
+            10 * 10 ** 6, // _amountIn
             0, // minOut
-            600 * 10 ** 30, // _sizeDelta  the USD value of the change in position size
+            100 * 10 ** 30, // _sizeDelta  the USD value of the change in position size
             true, // _isLong
             3000 * 10 ** 30, // _acceptablePrice
             3000_000_000_000_000, // _executionFee
