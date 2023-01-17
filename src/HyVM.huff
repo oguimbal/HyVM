@@ -30,24 +30,22 @@
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
     // store address of HyVM contract at the end of the runtimecode
     // memory position at construction time.
-    // It seems __codesize(CONSTRUCTOR) does not take into account 2 bytes
-    // hence we fix it manually
-    0x02                      // [0x02]
-    __codesize(CONSTRUCTOR)   // [__codesize(CONSTRUCTOR), 0x02]
-    add                       // [offset]
-    dup1                      // [offset, offset]
-    dup1                      // [offset, offset, offset]
-    address                   // [address(this), offset, offset, offset]
-    swap1                     // [offset, address(this), offset, offset]
-    codesize                  // [codesize, offset, address(this), offset, offset]
-    sub                       // [runtime_size, address(this), offset, offset]
-    mstore                    // [offset, offset]
+    // It seems there is a miscalculation somewhere and needs to be fixed
+    // manually. Jump table seems not taken into account in the
+    // __codesize(MAIN).
+    0x200                     // [0x200]
+    __codesize(MAIN)          // [__codesize(MAIN), 0x200]
+    add                       // [runtime_size]
+    dup1                      // [runtime_size, runtime_size]
+    dup1                      // [runtime_size, runtime_size, runtime_size]
+    dup1                      // [runtime_size, runtime_size, runtime_size, runtime_size]
+    address                   // [address(this), runtime_size, runtime_size, runtime_size, runtime_size]
+    swap1                     // [runtime_size, address(this), runtime_size, runtime_size, runtime_size]
+    mstore                    // [runtime_size, runtime_size, runtime_size]
 
     // Copy the runtimecode in memory
-    codesize                  // [codesize, offset, offset]
-    sub                       // [runtime_size, offset]
-    dup1                      // [runtime_size, runtime_size, offset]
-    swap2                     // [offset, runtime_size, runtime_size]
+    codesize                  // [codesize, runtime_size, runtime_size, runtime_size]
+    sub                       // [offset, runtime_size, runtime_size]
     0x00                      // [return_offset, offset, runtime_size, runtime_size]
     codecopy                  // [runtime_size]
 
