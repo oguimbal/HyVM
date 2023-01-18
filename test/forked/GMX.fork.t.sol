@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 
 import {Utils} from "../utils/Utils.sol";
 import {USDC} from "./ConstantsArbitrum.sol";
+import {IERC20} from "./../utils/interfaces/IERC20.sol";
 
 import {CallHyvm} from "./calls/CallHyvm.sol";
 import {GMXLong} from "./calls/GMX/GMXLong.sol";
@@ -40,8 +41,9 @@ contract GMXTest is Test {
         // Deal USDC and ETH to contract that will open a long position
         deal(USDC, address(gmxLong), 1000000000 * 10 ** 6);
         deal(address(gmxLong), 1000000000 * 10 ** 18);
+        uint256 balanceBefore = IERC20(USDC).balanceOf(address(gmxLong));
         // opens long position
-        gmxLong.gmxLong();
+        bytes32 key = gmxLong.gmxLong();
         // Keeper that will execute the requests
         address keeper = address(123);
         // Set keeper address as a keeper for the positionRouter
@@ -51,20 +53,23 @@ contract GMXTest is Test {
         // Execute transaction
         // The transaction is identified by a requestKey
         changePrank(keeper);
-        bytes32 key = positionRouter.getRequestKey(address(gmxLong), uint256(1));
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
+        uint256 balanceAfter = IERC20(USDC).balanceOf(address(gmxLong));
+        assertTrue(balanceBefore > balanceAfter);
     }
 
     function testGMXLongHyvm() public {
         // Deal USDC and ETH to contract that will open a long position
         deal(USDC, address(callHyvm), 1000000000 * 10 ** 6);
         deal(address(callHyvm), 1000000000 * 10 ** 18);
+        uint256 balanceBefore = IERC20(USDC).balanceOf(address(callHyvm));
         // replace "gmxLong" selector and bypass calldata size check
         bytes memory finalBytecode = Utils.replaceSelectorBypassCalldataSizeCheck(gmxLongHyvmBytecode, hex"9507c78f");
         // CallHyvm
-        callHyvm.callHyvm(hyvm, finalBytecode);
+        bytes memory data = callHyvm.callHyvm(hyvm, finalBytecode);
+        bytes32 key = abi.decode(data, (bytes32));
         // Keeper that will execute the requests
         address keeper = address(123);
         // Set keeper address as a keeper for the positionRouter
@@ -74,9 +79,10 @@ contract GMXTest is Test {
         // Execute transaction
         // The transaction is identified by a requestKey
         changePrank(keeper);
-        bytes32 key = positionRouter.getRequestKey(address(callHyvm), uint256(1));
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
+        uint256 balanceAfter = IERC20(USDC).balanceOf(address(callHyvm));
+        assertTrue(balanceBefore > balanceAfter);
     }
 }
