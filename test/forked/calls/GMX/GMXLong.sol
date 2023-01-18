@@ -13,7 +13,7 @@ contract GMXLong {
 
     constructor() {}
 
-    function gmxLong() public {
+    function gmxLong() public returns (bytes32 requestKey) {
         IERC20(USDC).approve(address(GMXRouter), type(uint256).max);
         IERC20(USDC).approve(address(positionRouter), type(uint256).max);
         GMXRouter.approvePlugin(address(positionRouter));
@@ -21,7 +21,7 @@ contract GMXLong {
         address[] memory path = new address[](2);
         path[0] = USDC;
         path[1] = WETH;
-        positionRouter.createIncreasePosition{value: 3000_000_000_000_000}(
+        requestKey = positionRouter.createIncreasePosition{value: 3000_000_000_000_000}(
             path, // [tokenIn, collateralToken] _path
             WETH, // _indexToken (token we want to long)
             10 * 10 ** 6, // _amountIn
