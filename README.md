@@ -108,18 +108,18 @@ There is an open issue to implement the validation if needed [here](https://gith
 
 ## Addresses
 
-Deployed at `0x36dAc1C6a72F94C13369Db9DAdCBD79ba5425019` on:
+Deployed at `0xE617D9103Bd8Fa3d0cDC8E9417ec2cA7aC6980Ed` on:
 
-- [Ethereum](https://etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Polygon](https://polygonscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [BNB Chain](https://bscscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Arbitrum](https://arbiscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code )
-- [Avalanche](https://snowtrace.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code )
-- [Optimism](https://optimistic.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Fantom](https://ftmscan.com/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Aurora](https://aurorascan.dev/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Goerli](https://goerli.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
-- [Sepolia](https://sepolia.etherscan.io/address/0x36dac1c6a72f94c13369db9dadcbd79ba5425019#code)
+- [Ethereum](https://etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Polygon](https://polygonscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [BNB Chain](https://bscscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Arbitrum](https://arbiscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Avalanche](https://snowtrace.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Optimism](https://optimistic.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Fantom](https://ftmscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Aurora](https://aurorascan.dev/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Goerli](https://goerli.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Sepolia](https://sepolia.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
 
 ## Getting Started
 
@@ -136,5 +136,5 @@ You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble byteco
 Example of how to deploy to Polygon:
 
 ```bash
-forge script --private-key XXXXXXXXXXXXX --mnemonic-indexes 4 --chain-id 137 --rpc-url https://polygon-rpc.com --froms 0x945f803f01F443616546d1F31466c0E7ACfF36f7 script/Deploy.s.sol --broadcast --gas-price 40000000000 --gas-limit 9632030 --legacy
+forge script --private-key XXXXXXXXXXXXX --chain-id 137 --rpc-url https://polygon-rpc.com --froms 0x945f803f01F443616546d1F31466c0E7ACfF36f7 --sender 0x945f803f01F443616546d1F31466c0E7ACfF36f7 script/Deploy.s.sol --broadcast --gas-price 40000000000 --gas-limit 9632030 --legacy
 ```
