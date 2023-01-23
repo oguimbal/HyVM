@@ -12,12 +12,6 @@
 /*                                  CONSTANTS                                 */
 /* -------------------------------------------------------------------------- */
 
-/// @dev Size of the address of HyVM
-#define constant SELF_ADDRESS_SIZE = 0x14
-
-/// @dev Offset to provide to codecopy when loading the address of the HyVM
-#define constant SELF_ADDRESS_OFFSET = 0x0c
-
 /// @dev Memory slot for VM internal operations
 #define constant KERNEL_MSLOT = 0x220
 
