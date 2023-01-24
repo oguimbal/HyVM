@@ -467,14 +467,38 @@ contract OpcodesTest is Test {
         assertEq(result, 0x20);
     }
 
-    // TODO gas test fails
-    // function testGas() public {
-    //     // bytecode generated using: easm test/opcodes/gas
-    //     (bool success, bytes memory data) = hyvm.delegatecall(hex"5a6200520845030360005260ff6000f3");
-    //     assertEq(success, true);
-    //     uint256 result = abi.decode(data, (uint256));
-    //     assertEq(result, 0x02);
-    // }
+    function testGas() public {
+        // bytecode generated using: easm test/opcodes/gas
+        (bool success, bytes memory data) = hyvm.delegatecall(hex"5a5a900360005260ff6000f3");
+        assertEq(success, true);
+        uint256 result = abi.decode(data, (uint256));
+        // result will be 67 as there are instructions to read opcodes from bytecode
+        // between the 2 gas instructions
+        // see CONTINUE() macro:
+        // opcodes below equals to 65 in gas hence gas opocode return the correct value
+        // 3 push1 00
+        // 3 mload
+        // 3 dup1
+        // 3 calldataload
+        // 3 push1 f8
+        // 3 shr
+        // 3 swap1
+        // 3 push1 01
+        // 3 add
+        // 3 push1 00
+        // 3 mstore
+        // 3 push1 02
+        // 5 mul
+        // 3 push1 20
+        // 3 add
+        // 3 mload
+        // 3 push1 f0
+        // 3 shr
+        // 8 jump
+        // 1 jumpdest
+        // 2 gas
+        assertEq(result, 0x43);
+    }
 
     function testPush1() public {
         // bytecode generated using: easm test/opcodes/push1
