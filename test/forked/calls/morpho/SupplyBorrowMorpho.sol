@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 import {IERC20} from "../../../utils/interfaces/IERC20.sol";
 import {cDAI, cUSDC, DAI, USDC} from "../../ConstantsEthereum.sol";

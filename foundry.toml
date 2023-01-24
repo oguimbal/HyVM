@@ -1,6 +1,6 @@
 
 [profile.default]
-solc_version = '0.8.15'
+solc_version = '0.8.16'
 auto_detect_solc = false
 optimizer = true
 optimizer_runs = 200 # Default amount

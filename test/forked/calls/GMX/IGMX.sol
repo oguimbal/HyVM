@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 interface IGMXPositionRouter {
     function createIncreasePosition(

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 contract CallHyvm {
     function callHyvm(address hyvm, bytes calldata bytecode) public returns (bytes memory) {

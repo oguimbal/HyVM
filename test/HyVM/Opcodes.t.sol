@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
