@@ -25,7 +25,7 @@ jobs:
       - name: Install Solidity compiler
         uses: pontem-network/get-solc@master
         with:
-          version: v0.8.15
+          version: v0.8.16
 
       - name: Create env file
         run: |

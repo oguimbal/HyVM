@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 interface ILens {
     function getCurrentBorrowBalanceInOf(address _poolTokenAddress, address _user)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 import {IUniswapV2Router01} from "../../../utils/interfaces/IUniswapV2Router01.sol";
 import {IERC20} from "../../../utils/interfaces/IERC20.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 address constant WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
 address constant DAI = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;

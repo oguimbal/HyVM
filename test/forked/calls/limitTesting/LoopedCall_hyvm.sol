@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 contract LoopedCall {
     constructor(ILooper _looper, uint256 i) {
