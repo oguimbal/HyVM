@@ -7,9 +7,6 @@ import "forge-std/Test.sol";
 import {Utils} from "../utils/Utils.sol";
 
 contract OpcodesTest is Test {
-    // Will be made available as a forge-std constant in 1.2.0 release
-    // https://github.com/foundry-rs/forge-std/pull/229
-    address constant DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
     address public hyvm;
 
