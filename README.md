@@ -108,18 +108,18 @@ There is an open issue to implement the validation if needed [here](https://gith
 
 ## Addresses
 
-Deployed at `0xE617D9103Bd8Fa3d0cDC8E9417ec2cA7aC6980Ed` on:
+Deployed at `0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195` on:
 
-- [Ethereum](https://etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Polygon](https://polygonscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [BNB Chain](https://bscscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Arbitrum](https://arbiscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Avalanche](https://snowtrace.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Optimism](https://optimistic.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Fantom](https://ftmscan.com/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Aurora](https://aurorascan.dev/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Goerli](https://goerli.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
-- [Sepolia](https://sepolia.etherscan.io/address/0xe617d9103bd8fa3d0cdc8e9417ec2ca7ac6980ed#code)
+- [Ethereum](https://etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Polygon](https://polygonscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [BNB Chain](https://bscscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Arbitrum](https://arbiscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Avalanche](https://snowtrace.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Optimism](https://optimistic.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Fantom](https://ftmscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Aurora](https://aurorascan.dev/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Goerli](https://goerli.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+- [Sepolia](https://sepolia.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
 
 ## Getting Started
 
