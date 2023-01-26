@@ -18,7 +18,7 @@ contract Deploy is Script {
         inputs[2] = bashCommand;
 
         bytes memory bytecode = abi.decode(vm.ffi(inputs), (bytes));
-        bytes32 salt = keccak256("HyVM_FINAL");
+        bytes32 salt = keccak256("HyVM_V1");
 
         deployedAddress = DEPLOYER.computeAddress(salt, keccak256(bytecode));
 
