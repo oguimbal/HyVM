@@ -102,3 +102,27 @@
     // jump to the operation given on stack
     JUMP_TO_OPCODE()           // []
 }
+
+/// @dev Ensure that execution is in a context of a delegate call.
+///      If not, it will revert as it opens the door to selfdestruct the HyVM
+///      and more security problems:
+///      relying on storage values in the HyVM, using the HyVM as a swap router
+///      and approving token spending, tainting the HyVM (and possibly all users)
+///      by making it call an OFAC sanctioned address and more.
+#define macro ENSURE_DELEGATECALL_CONTEXT() = takes(0) returns (0) {
+    // Copy address HyVM from end of runtimebytecode
+    0x20                                       // [size]
+    dup1                                       // [size, size]
+    codesize                                   // [codesize, size, size]
+    sub                                        // [offset, size]
+    [KERNEL_MSLOT]                             // [returnoffset, offset, size]
+    codecopy                                   // []
+    // load on stack
+    [KERNEL_MSLOT]                             // [KERNEL_MSLOT]
+    mload                                      // [32 bytes]
+    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF // [20 bytes bitmask, 32 bytes]
+    and                                        // [address(hyvm)]
+    // compare to currently executing account
+    address eq                                 // [address(hyvm)==address(this)]
+    wrong_context jumpi                        // []
+}

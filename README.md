@@ -43,16 +43,9 @@ There is no limit on which interactions that can be created.
 Custom and complex logic with chained calls can be executed by the HyVM opening a lot possibilities.
 Repetitive intructions and common ones could also be called as helper contract if needed.
 
-## Examples of use
+## How to use the HyVM
 
-### Static functions / get rid of helpers
-The most straightforward use is for readonly functions: no need to deploy helper contracts to do lots of things !
-
-👉 For instance, see [this gist](https://gist.github.com/oguimbal/3cc74f6234a006fd9685333381679657) which demonstrates how to fetch multiple balances on-chain at once.
-
-### More general use
-
-Another way to use the HyVM is to use it as a library called with delegatecall.
+The way to use the HyVM is to use it as a library called with delegatecall.
 As shown below, a [contract wallet](https://decommas.io/blog/smart-contract-wallets-explained) allows to execute a delegatecall (or several), and thus to call the HyVM. The DApp managing the contract wallet gives the bytecode for the HyVM to execute. For example:
 * Swap multiple assets.
 * Approve & deposit.
@@ -65,7 +58,7 @@ As shown below, a [contract wallet](https://decommas.io/blog/smart-contract-wall
 
 ### Calling the HyVM
 
-The HyVM ingests raw bytecode (as input) via `call` or `delegateCall`, then processes the opcodes and executes them.
+The HyVM ingests raw bytecode (as input) via `delegateCall`, then processes the opcodes and executes them.
 
 <div align="center">
   <img width="600" alt="image" src="./static/processBytecode.png">
