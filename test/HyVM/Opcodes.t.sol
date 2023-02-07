@@ -22,11 +22,6 @@ contract OpcodesTest is Test {
         console.log(Utils.iToHex(abi.encodePacked(bytes(str).length)));
     }
 
-    // just a test that shows what to write in HyVM.huff to console.log something.
-    function testGenerate() public view {
-        logStr("no call verifier set");
-    }
-
     // =================== TESTS ==============
 
     function testPushReturnMstore() public {
