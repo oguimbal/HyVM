@@ -40,13 +40,13 @@ In our case, the HyVM allows to run an **EVM on top the EVM** and execute [opcod
 
 Using the HyVM gives a maximum of flexibility, it replaces using specific scripts to interact with external protocols.
 There is no limit on which interactions that can be created.
-Custom and complex logic with chained calls can be executed by the HyVM opening a lot possibilities.
-Repetitive intructions and common ones could also be called as helper contract if needed.
+Custom and complex logic with chained calls can be executed by the HyVM opening a lot of possibilities.
+Repetitive instructions and common ones could also be called as helper contract if needed.
 
 ## Examples of use
 
 ### Static functions / get rid of helpers
-The most straightforward use is for readonly functions: no need to deploy helper contracts to do lots of things !
+The most straightforward use is for readonly functions: no need to deploy helper contracts to do lots of things!
 
 👉 For instance, see [this gist](https://gist.github.com/oguimbal/3cc74f6234a006fd9685333381679657) which demonstrates how to fetch multiple balances on-chain at once.
 
@@ -97,7 +97,7 @@ The HyVM private memory layout is as follows:
 - `[0x00-0x20]` 👉 Execution pointer
 - `[0x20-0x220]` 👉 Jump table
 - `[0x220-0x340]` 👉 Memory reserved for debug purposes (see debug-utils.huff)
-- `[0x220-0x460]` **(when contract contract verifier is enabled)** 👉 Memory used to store contract verification call args & result. nb: It overlaps debug memory (because we dont need them both at the same time)
+- `[0x220-0x460]` **(when contract contract verifier is enabled)** 👉 Memory used to store contract verification call args & result. nb: It overlaps debug memory (because we don't need them both at the same time)
 
 Thus, the actual memory of the host is starting at either 0x340 or 0x460 depending on the chosen configuration.
 
