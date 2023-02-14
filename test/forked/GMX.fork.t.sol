@@ -23,7 +23,7 @@ contract GMXTest is Test {
     // PositionRouter
     IGMXPositionRouter positionRouter = IGMXPositionRouter(0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868);
     // Admin of the Position Router
-    address positionRouterAdmin = address(0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8);
+    address positionRouterAdmin = address(0xB4d2603B2494103C90B2c607261DD85484b49eF0);
 
     //  =====   Set up  =====
     function setUp() public {
