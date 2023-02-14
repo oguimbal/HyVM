@@ -89,7 +89,7 @@
 }
 
 /// @dev Move the pointer to the next instruction
-#define macro CONTINUE() = takes(0) returns (1) {
+#define macro CONTINUE() = takes(0) returns (0) {
     // load the instruction located at this execution pointer
     [EXEC_POINTER_MSLOT] mload // [ptr]
 
