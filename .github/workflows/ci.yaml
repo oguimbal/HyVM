@@ -18,9 +18,9 @@ jobs:
           version: nightly
 
       - name: Install Huff
-        uses: huff-language/huff-toolchain@v2
+        uses: huff-language/huff-toolchain@v3
         with:
-          version: nightly
+          version: nightly-d4638680736ad104290bc7a28542c058a18debf4
 
       - name: Install Solidity compiler
         uses: pontem-network/get-solc@master

@@ -124,7 +124,7 @@ Deployed at `0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195` on:
 ## Getting Started
 
 You will need:
-* [Huff](https://docs.huff.sh/get-started/installing/)
+* [Huff](https://docs.huff.sh/get-started/installing/) (`huffc 0.3.0` / `nightly-d4638680736ad104290bc7a28542c058a18debf4`)
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
 You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler).  
