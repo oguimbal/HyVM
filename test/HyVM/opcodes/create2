@@ -1,4 +1,4 @@
-# Create contract with 0 wei and opcodes/contracts/callcodeContract as code
+# Create contract with 0 wei and opcodes/contracts/exceptionIfFirstSlotStorageIs0 as code
 
 PUSH17 0x67600054600757FE5B60005260086018F3
 PUSH1 0x0

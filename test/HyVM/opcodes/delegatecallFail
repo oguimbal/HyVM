@@ -1,11 +1,11 @@
-# See callcodeContract for more info on this call
+# See exceptionIfFirstSlotStorageIs0 for more info on this call
 
 # Reset first slot in current contract
 PUSH1 0x0
 PUSH1 0x0
 SSTORE
 
-# Delegatecall to callcodeContract contract
+# Delegatecall to exceptionIfFirstSlotStorageIs0 contract
 PUSH1 0x0
 PUSH1 0x0
 PUSH1 0x0

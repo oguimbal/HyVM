@@ -97,17 +97,6 @@
         CHECK_GENERIC_CALL() // => [gas address argsOffset argsSize retOffset retSize]
 }
 
-/// @dev Check that the pending CALLCODE operation is OK
-#define macro CHECK_CALLCODE() = takes(0) returns (0) {
-        // - check can call
-        dup5 // push argSize
-        dup5 // push argOffset
-        dup5 // push value
-        dup5 // push contract address
-        0xF4 // push opcode
-        CHECK_GENERIC_CALL()
-}
-
 /// @dev Check that the pending CALL operation is OK
 #define macro CHECK_CALL() = takes(0) returns (0) {
         // - check can call

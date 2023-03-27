@@ -676,22 +676,8 @@
         CONTINUE()
 
     op_callcode:
-        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
-        // fix argsOffset
-        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
-        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
-        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
-
-        // fix retOffset
-        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
-        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
-        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
-
-        // check can call
-        CHECK_CALLCODE()    // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
-
-        callcode            // [success]
-        CONTINUE()
+        // callcode is deprecated and generally considered unsafe
+        0x00 0x00 revert
 
     op_return:
         // takes         // [retOffset, retSize]
