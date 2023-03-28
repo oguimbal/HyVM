@@ -99,8 +99,19 @@ Thus, the actual memory of the host is starting at either 0x340 or 0x460 dependi
 ⚠️ The HyVM skips `jumpdest` (0x5B) validations that might appear in `push` opcodes values. This is OK if the executed bytecode is well formed (for instance, if you compiled it using `solc` or equivalent). But if you feed broken bytecode to the HyVM, this could lead to some discrepancies between the HyVM and the actual EVM behaviour.  
 There is an open issue to implement the validation if needed [here](https://github.com/oguimbal/HyVM/issues/16).
 
-## HyVM/EVM divergences
-* `callcode` will revert : it is deprecated and generally considered unsafe.
+## HyVM / EVM divergence
+
+The HyVM consistently behaves as if the executed code did not receive any calldata.  
+The calldata in the delegatecall to the HyVM is the code to be executed.  
+Consequently, there are some opcodes divergence:
+- `calldataload`: pushes 0 on stack
+- `calldatasize`: pushes 0 on stack
+- `calldatacopy`: copies zeros in the specified location
+- `selfdestruct`: reverts to prevent malicious or erroneous selfdestruct
+- `jumpdest`: as mentioned in the disclaimer, there is no check to ensure the validity of the opcode.
+- `codesize`: returns the calldatasize, not the VM size
+- `callcode` will revert : it is deprecated and generally considered unsafe.
+
 
 ## Addresses
 
