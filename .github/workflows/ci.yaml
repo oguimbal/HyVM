@@ -15,7 +15,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: nightly-7398b65e831f2339d1d0a0bb05ade799e4f9d01e
 
       - name: Install Huff
         uses: huff-language/huff-toolchain@v3
