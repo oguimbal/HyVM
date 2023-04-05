@@ -106,6 +106,10 @@ Thus, the actual memory of the host is starting at either 0x340 or 0x460 dependi
 ⚠️ The HyVM skips `jumpdest` (0x5B) validations that might appear in `push` opcodes values. This is OK if the executed bytecode is well formed (for instance, if you compiled it using `solc` or equivalent). But if you feed broken bytecode to the HyVM, this could lead to some discrepancies between the HyVM and the actual EVM behaviour.  
 There is an open issue to implement the validation if needed [here](https://github.com/oguimbal/HyVM/issues/16).
 
+## Note
+There is a workaround in the constructor to take into account a compiler bug.  
+It was raised in this [issue](https://github.com/huff-language/huff-rs/issues/238).
+
 ## Addresses
 
 Deployed at `0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195` on:
