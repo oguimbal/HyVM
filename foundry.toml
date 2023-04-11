@@ -10,6 +10,8 @@ remappings = [
   "forge-std=lib/forge-std/src/",
   "foundry-huff=lib/foundry-huff/src/",
 ]
+fork_block_number = 17024124 # pin block number for forked tests
+
 [profile.default.rpc_endpoints]
 eth = 'https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}'
 arbi = 'https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY_ARBITRUM}'
