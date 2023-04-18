@@ -246,8 +246,8 @@
         // fix destOffset
         FIX_MEMOFFSET()
 
-        // when using HyVM, the code resides in calldata
-        //  => codecopy is a really a calldatacopy
+        // when using the HyVM, the code resides in calldata
+        // codecopy is really a calldatacopy
         calldatacopy
 
         CONTINUE()

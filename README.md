@@ -111,7 +111,7 @@ Consequently, there are some opcodes divergence:
 - `jumpdest`: as mentioned in the disclaimer, there is no check to ensure the validity of the opcode.
 - `codesize`: returns the calldatasize, not the VM size
 - `callcode` will revert : it is deprecated and generally considered unsafe.
-
+- `codecopy`: copies from the calldata, not the code
 
 ## Addresses
 
