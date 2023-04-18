@@ -347,22 +347,6 @@ contract OpcodesTest is Test {
         assertEq(result, address(this));
     }
 
-    function testAddress_call() public {
-        // bytecode generated using: easm test/opcodes/address
-        (bool success, bytes memory data) = hyvm.call(hex"3060005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, hyvm);
-    }
-
-    function testAddress_staticcall() public {
-        // bytecode generated using: easm test/opcodes/address
-        (bool success, bytes memory data) = hyvm.staticcall(hex"3060005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, hyvm);
-    }
-
     function testBalance() public {
         // bytecode generated using: easm test/opcodes/balance
         (bool success, bytes memory data) = hyvm.delegatecall(hex"303160005260ff6000f3");
@@ -379,44 +363,12 @@ contract OpcodesTest is Test {
         assertEq(result, DEFAULT_SENDER);
     }
 
-    function testOrigin_call() public {
-        // bytecode generated using: easm test/opcodes/origin
-        (bool success, bytes memory data) = hyvm.call(hex"3260005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, DEFAULT_SENDER);
-    }
-
-    function testOrigin_staticcall() public {
-        // bytecode generated using: easm test/opcodes/origin
-        (bool success, bytes memory data) = hyvm.staticcall(hex"3260005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, DEFAULT_SENDER);
-    }
-
     function testCaller_delegatecall() public {
         // bytecode generated using: easm test/opcodes/caller
         (bool success, bytes memory data) = hyvm.delegatecall(hex"3360005260ff6000f3");
         assertEq(success, true);
         address result = abi.decode(data, (address));
         assertEq(result, DEFAULT_SENDER);
-    }
-
-    function testCaller_call() public {
-        // bytecode generated using: easm test/opcodes/caller
-        (bool success, bytes memory data) = hyvm.call(hex"3360005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, address(this));
-    }
-
-    function testCaller_staticcall() public {
-        // bytecode generated using: easm test/opcodes/caller
-        (bool success, bytes memory data) = hyvm.staticcall(hex"3360005260ff6000f3");
-        assertEq(success, true);
-        address result = abi.decode(data, (address));
-        assertEq(result, address(this));
     }
 
     function testCallvalue() public {
@@ -1147,27 +1099,21 @@ contract OpcodesTest is Test {
         assertEq(code, hex"600054600757fe5b");
     }
 
-    function testCannotDelegateCallInCallContext() public {
-        // It is the same test as testDelegateCall.
-        // Only difference is the call to the HyVM instead of a delegatecall.
-        // The bytecode itself contains a delegate that should revert
-        // as it should not be possible to do a delegatecall in the context of a
-        // call to the HyVM. It is not possible to test the specific case of
-        // selfdestruct as it is not supported by foundry
-        // https://github.com/foundry-rs/foundry/issues/2844
-        address calldatacontract;
-        assembly {
-            // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/exceptionIfFirstSlotStorageIs0
-            calldatacontract := create(0, 15, 17)
-        }
-        // bytecode generated using: easm test/opcodes/delegateCall
-        bytes memory bytecode =
-            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff460005260ff6000f3";
-        // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
+    function testCannotCallHyVM() public {
+        bytes memory bytecode = hex"60ff60005260ff6000f3";
+        // bytecode generated using: easm test/opcodes/push1
+        (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
+        // success in delegatecall
+        assertEq(success, true);
+        uint256 result = abi.decode(data, (uint256));
+        assertEq(result, 0xff);
+        // revert in call
         vm.expectRevert();
-        (bool success, ) = hyvm.call(bytecode);
+        (success, ) = hyvm.call(bytecode);
+        assertTrue(success, "expectRevert: call did not revert");
+        // revert in staticcal
+        vm.expectRevert();
+        (success, ) = hyvm.staticcall(bytecode);
         assertTrue(success, "expectRevert: call did not revert");
     }
 
