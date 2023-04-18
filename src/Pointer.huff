@@ -42,8 +42,12 @@
 ///      allocated to host. Everything before will be owned by the VM, and
 ///      innaccessible by the host.
 #define macro FIX_MEMOFFSET() = takes (1) returns (1) {
-    // Takes                // [mem_offset]
-    [HOST_MEMORY_START] add // [mem_offset + HOST_MEMORY_START]
+    // Takes                                        // [mem_offset]
+    // Mask off upper bytes to ensure that the addition will not overflow.
+    // It will corrupt all the memory accesses to very high addresses.
+    // But those cannot be legitimate: they will end-up in out-of-gas anyway.
+    0xffffffffffffffffffffffffffffffffffffffff and  // [mem_offset_masked]
+    [HOST_MEMORY_START] add                         // [mem_offset_masked + HOST_MEMORY_START]
 }
 
 /// @dev Increment the execution pointer location by one byte

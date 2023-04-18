@@ -1188,4 +1188,14 @@ contract OpcodesTest is Test {
         (bool success, ) = hyvm.delegatecall(bytecode);
         assertTrue(success, "expectRevert: call did not revert");
     }
+
+    function testPCRetrievalByOverFlow() public {
+        // bytecode generated using: easm test/opcodes/pc-retrieval-by-overflow
+        // simple mstore that will go too far in memory
+        vm.expectRevert(bytes(""));
+        (bool success,) = hyvm.delegatecall(
+            hex"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51"
+        );
+        assertTrue(success, "expectRevert: call did not revert");
+    }
 }
