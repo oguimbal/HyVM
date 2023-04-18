@@ -12,9 +12,6 @@
 #define macro CHECK_STATICCALL() = takes(0) returns (0) {
 }
 
-#define macro CHECK_CALLCODE() = takes(0) returns (0) {
-}
-
 #define macro CHECK_CALL() = takes(0) returns (0) {
 }
 

@@ -1085,47 +1085,11 @@ contract OpcodesTest is Test {
         assertEq(result, 0x0);
     }
 
-    function testCallcode() public {
-        address calldatacontract;
-        assembly {
-            // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
-            calldatacontract := create(0, 15, 17)
-        }
-        // bytecode generated using: easm test/opcodes/callcode
-        bytes memory bytecode =
-            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
-        // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
-        (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
-        assertEq(success, true);
-        uint256 result = abi.decode(data, (uint256));
-        assertEq(result, 0x1);
-    }
-
-    function testCallcodeFail() public {
-        address calldatacontract;
-        assembly {
-            // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
-            calldatacontract := create(0, 15, 17)
-        }
-        // bytecode generated using: easm test/opcodes/callcodeFail
-        bytes memory bytecode =
-            hex"60006000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
-        // we replace the dummy address with actual contract address
-        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
-        (bool success, bytes memory data) = hyvm.delegatecall(bytecode);
-        assertEq(success, true);
-        uint256 result = abi.decode(data, (uint256));
-        assertEq(result, 0x0);
-    }
-
     function testDelegateCall() public {
         address calldatacontract;
         assembly {
             // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
+            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/exceptionIfFirstSlotStorageIs0
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/delegateCall
@@ -1143,7 +1107,7 @@ contract OpcodesTest is Test {
         address calldatacontract;
         assembly {
             // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
+            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/exceptionIfFirstSlotStorageIs0
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/delegateCallFail
@@ -1164,7 +1128,7 @@ contract OpcodesTest is Test {
         assertEq(success, true);
         // It send us back an address
         (address result) = abi.decode(data, (address));
-        // Let's verify that the code present is callcodeContract bytecode
+        // Let's verify that the code present is exceptionIfFirstSlotStorageIs0 bytecode
         bytes memory code = result.code;
         assertEq(code, hex"600054600757fe5b");
     }
@@ -1178,7 +1142,7 @@ contract OpcodesTest is Test {
         assertEq(success, true);
         // It send us back an address
         (address result) = abi.decode(data, (address));
-        // Let's verify that the code present is callcodeContract bytecode
+        // Let's verify that the code present is exceptionIfFirstSlotStorageIs0 bytecode
         bytes memory code = result.code;
         assertEq(code, hex"600054600757fe5b");
     }
@@ -1194,7 +1158,7 @@ contract OpcodesTest is Test {
         address calldatacontract;
         assembly {
             // use scratch space
-            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/callcodeContract
+            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/exceptionIfFirstSlotStorageIs0
             calldatacontract := create(0, 15, 17)
         }
         // bytecode generated using: easm test/opcodes/delegateCall
@@ -1204,6 +1168,24 @@ contract OpcodesTest is Test {
         bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
         vm.expectRevert();
         (bool success, ) = hyvm.call(bytecode);
+        assertTrue(success, "expectRevert: call did not revert");
+    }
+
+    function testCallcodeNotSupported() public {
+        address calldatacontract;
+        assembly {
+            // use scratch space
+            mstore(0, 0x67600054600757FE5B60005260086018F3) // see opcodes/contracts/exceptionIfFirstSlotStorageIs0
+            calldatacontract := create(0, 15, 17)
+        }
+        // bytecode generated using: easm test/opcodes/callcode
+        // should revert without an error message
+        bytes memory bytecode =
+            hex"60016000556000600060006000600073123123123123123123123123123123123123123161fffff260005260ff6000f3";
+        // we replace the dummy address with actual contract address
+        bytecode = Utils.replace(bytecode, 0x1231231231231231231231231231231231231231, calldatacontract);
+        vm.expectRevert(bytes(""));
+        (bool success, ) = hyvm.delegatecall(bytecode);
         assertTrue(success, "expectRevert: call did not revert");
     }
 }

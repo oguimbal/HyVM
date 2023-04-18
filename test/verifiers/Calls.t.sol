@@ -31,7 +31,7 @@ contract MyTokenTest is Test {
     // TODO test ownership... once an owner is defined, must not be able to change owner,
     // TODO once there is an owner, the owner must be able to change verifier
     // TODO once there is an owner, someone else cannot change the verifier
-    // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL & CALLCODE)
+    // TODO write tests for all kind of calls (as time of writing, only CALL & STATICCALL are tested, but we must also test DELEGATECALL)
 
     function setVerifier(IHyVMCallVerifier verifier) public {
         bytes memory code = Utils.setVerifierBytecode(hyvm, address(verifier));

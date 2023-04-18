@@ -1,5 +1,5 @@
 # creates an exception if first slot of storage is 0
-# Source: https://www.evm.codes/ playground for CALLCODE
+# Source: https://www.evm.codes/ playground for DELEGATECALL
 # 0x67600054600757FE5B60005260086018F3
 # you can disassemble it with pyevmasm to get
 # mnemonic creation code and logic (below)
