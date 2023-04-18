@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Unlicence
 
-/// @title No Verifier 
+/// @title No Verifier.
 /// @notice Abstract contract for the HyVM without call/store verifications
+///         checks could be implemented at the discretion of the developper.
 
 /// @dev jump table will be located at 0x20, after the execution pointer
 #define constant HOST_MEMORY_START = 0x340
