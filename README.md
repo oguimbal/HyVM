@@ -124,7 +124,9 @@ Deployed at `0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195` on:
 ## Getting Started
 
 You will need:
-* [Huff](https://docs.huff.sh/get-started/installing/)
+* [Huff](https://docs.huff.sh/get-started/installing/) (`huffc 0.3.1` / `nightly-94c34e402a46365fee29863aa08558af178c2b94`)  
+This is the last version with which the HyVM was tested.
+It is not possible to pin the Huffc version in CI consistently as pre-released versions are pruned and only the 3 newest nightlies are kept. So it is not pinned in CI.
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
 You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler).  

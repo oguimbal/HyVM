@@ -24,11 +24,7 @@
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
     // store address of HyVM contract at the end of the runtimecode
     // memory position at construction time.
-    // It seems __codesize(CONSTRUCTOR) does not take into account 2 bytes
-    // hence we fix it manually
-    0x02                      // [0x02]
-    __codesize(CONSTRUCTOR)   // [__codesize(CONSTRUCTOR), 0x02]
-    add                       // [offset]
+    __codesize(CONSTRUCTOR)   // [offset]
     dup1                      // [offset, offset]
     dup1                      // [offset, offset, offset]
     address                   // [address(this), offset, offset, offset]
