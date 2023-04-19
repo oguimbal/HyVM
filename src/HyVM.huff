@@ -199,41 +199,44 @@
         CONTINUE()
 
     op_calldataload:
-        // getting calldata is not supported in a vm => load a 0
+        // HyVM always behave as if the executed code did not receive any calldata
+        // Push 0 on stack to emulate this behavior
 
-        pop //  remove the index to load (we dont care)
-        0x00 // push 0 as the loaded value
+        // takes            // [offset]
+        pop                 // []
+        0x00                // [value]
 
         CONTINUE()
 
     op_calldatasize:
-        // no call data
+        // HyVM always behave as if the executed code did not receive any calldata
+        // Push 0 on stack to emulate this behavior
         0x0
         CONTINUE()
 
     op_calldatacopy:
-        // [destOffset, offest, size]
+        // HyVM always behave as if the executed code did not receive any calldata
+        // Copies zeros in the specified location to emulate this behavior
+
+        // takes                // [destOffset, offest, size]
 
         // fix destOffset
-        FIX_MEMOFFSET() // =>  [fixed destOffset, calldataSize, size]
+        FIX_MEMOFFSET()         // [fixed_destOffset, offest, size]
 
-        // getting calldata is not supported in a vm
-        //  -> copy zeros (by running calldatacopy with an index which is after the current calldata)
+        // fix offset to make it out of bounds and copy zeroes
+        swap1                   // [offest, fixed_destOffset, size]
+        pop                     // [fixed_destOffset, size]
+        calldatasize            // [calldataSize, fixed_destOffset, size]
+        swap1                   // [fixed_destOffset, calldataSize, size]
 
-        // fix offset to make it out of bounds
-        swap1 // => [offest, destOffset, size]
-        pop //  [destOffset, size]
-        calldatasize // => [calldataSize, destOffset, size]
-        swap1//   => [destOffset, calldataSize, size]
-
-        calldatacopy
+        calldatacopy            // []
 
         CONTINUE()
 
     op_codesize:
-        // When using the HyVM, the code resides in calldata.
-        // Code size is the same as calldata size.
-        calldatasize
+        // when using the HyVM, the code resides in calldata
+        // codesize is really a calldatasize
+        calldatasize           // [value]
 
         CONTINUE()
 
@@ -243,8 +246,8 @@
         // fix destOffset
         FIX_MEMOFFSET()
 
-        // when using HyVM, the code resides in calldata
-        //  => codecopy is a really a calldatacopy
+        // when using the HyVM, the code resides in calldata
+        // codecopy is really a calldatacopy
         calldatacopy
 
         CONTINUE()
@@ -748,7 +751,7 @@
         CONTINUE()
 
     selfdestruct:
-        // SELFDESTRUCT is not supported by HyVM, for obvious reasons...
+        // reverts to avoid malicious or erroneous selfdestruct
         0x00 0x00 revert
 
     unused:
