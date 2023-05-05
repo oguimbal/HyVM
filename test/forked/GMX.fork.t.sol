@@ -48,11 +48,11 @@ contract GMXTest is Test {
         address keeper = address(123);
         // Set keeper address as a keeper for the positionRouter
         // Only admin fuction
-        changePrank(positionRouterAdmin);
+        vm.prank(positionRouterAdmin);
         positionRouter.setPositionKeeper(keeper, true);
         // Execute transaction
         // The transaction is identified by a requestKey
-        changePrank(keeper);
+        vm.prank(keeper);
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
@@ -74,11 +74,11 @@ contract GMXTest is Test {
         address keeper = address(123);
         // Set keeper address as a keeper for the positionRouter
         // Only admin fuction
-        changePrank(positionRouterAdmin);
+        vm.prank(positionRouterAdmin);
         positionRouter.setPositionKeeper(keeper, true);
         // Execute transaction
         // The transaction is identified by a requestKey
-        changePrank(keeper);
+        vm.prank(keeper);
         bool exec = positionRouter.executeIncreasePosition(key, payable(keeper));
         // verify that the request was executed
         assertEq(exec, true);
