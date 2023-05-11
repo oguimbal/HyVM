@@ -406,7 +406,10 @@
         // do nothing
         CONTINUE()
 
-
+    op_push0:
+        0x00
+        PICK_DATA()
+        CONTINUE()
     op_push1:
         0x01
         PICK_DATA()
