@@ -1,0 +1,794 @@
+// SPDX-License-Identifier: Unlicence
+
+/// @title HyVM
+/// @notice Run arbitrary code on the EVM
+
+#include "./Pointer.huff"
+#include "./Jump-table.huff"
+#include "./abstracts/no-verifier.huff"
+
+/* -------------------------------------------------------------------------- */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+/// @dev Memory slot for VM internal operations
+#define constant KERNEL_MSLOT = 0x220
+
+/* -------------------------------------------------------------------------- */
+/*                                 CONSTRUCTOR                                */
+/* -------------------------------------------------------------------------- */
+
+/// @dev The constructor stores the address of the HyVm at the end of the
+///      runtime bytecode. See ENSURE_DELEGATECALL_CONTEXT macro.
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    // store address of HyVM contract at the end of the runtimecode
+    // memory position at construction time.
+    __codesize(CONSTRUCTOR)   // [offset]
+    dup1                      // [offset, offset]
+    dup1                      // [offset, offset, offset]
+    address                   // [address(this), offset, offset, offset]
+    swap1                     // [offset, address(this), offset, offset]
+    codesize                  // [codesize, offset, address(this), offset, offset]
+    sub                       // [runtime_size, address(this), offset, offset]
+    mstore                    // [offset, offset]
+
+    // Copy the runtimecode in memory
+    codesize                  // [codesize, offset, offset]
+    sub                       // [runtime_size, offset]
+    dup1                      // [runtime_size, runtime_size, offset]
+    swap2                     // [offset, runtime_size, runtime_size]
+    0x00                      // [return_offset, offset, runtime_size, runtime_size]
+    codecopy                  // [runtime_size]
+
+    // Add the address at the end to the size, it is right padded
+    0x20                      // [0x20, runtime_size]
+    add                       // [runtime_size + 0x20]
+    0x00                      // [offset, runtime_size + 0x20]
+    return
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 FALLBACK                                   */
+/* -------------------------------------------------------------------------- */
+
+/// @notice Entry point of the HyVM
+#define macro MAIN() = takes(0) returns (0) {
+    // Forbid calls to the HyVM
+    ENSURE_DELEGATECALL_CONTEXT()
+
+    // init memory by storing a word just before the host memory start
+    // so msize will return 0
+    0x0 0x20 [HOST_MEMORY_START] sub mstore
+
+    INIT_JUMPTABLE()
+    CONTINUE()
+
+    notimplemented:
+
+    op_stop:
+        stop
+        CONTINUE()
+
+    op_add:
+        add
+        CONTINUE()
+
+    op_mul:
+        mul
+        CONTINUE()
+
+    op_sub:
+        sub
+        CONTINUE()
+
+    op_div:
+        div
+        CONTINUE()
+
+    op_sdiv:
+        sdiv
+        CONTINUE()
+
+    op_mod:
+        mod
+        CONTINUE()
+
+    op_smod:
+        smod
+        CONTINUE()
+
+    op_addmod:
+        addmod
+        CONTINUE()
+
+    op_mulmod:
+        mulmod
+        CONTINUE()
+
+    op_exp:
+        exp
+        CONTINUE()
+
+    op_signextend:
+        signextend
+        CONTINUE()
+
+    op_lt:
+        lt
+        CONTINUE()
+
+    op_gt:
+        gt
+        CONTINUE()
+
+    op_slt:
+        slt
+        CONTINUE()
+
+    op_sgt:
+        sgt
+        CONTINUE()
+
+    op_eq:
+        eq
+        CONTINUE()
+
+    op_iszero:
+        iszero
+        CONTINUE()
+
+    op_and:
+        and
+        CONTINUE()
+
+    op_or:
+        or
+        CONTINUE()
+
+    op_xor:
+        xor
+        CONTINUE()
+
+    op_not:
+        not
+        CONTINUE()
+
+    op_byte:
+        byte
+        CONTINUE()
+
+    op_shl:
+        shl
+        CONTINUE()
+
+    op_shr:
+        shr
+        CONTINUE()
+
+    op_sar:
+        sar
+        CONTINUE()
+
+    op_sha3:
+        // [offset, size]
+
+        // fix offset
+        FIX_MEMOFFSET()
+
+        sha3
+        CONTINUE()
+
+    op_address:
+        address
+        CONTINUE()
+
+    op_balance:
+        balance
+        CONTINUE()
+
+    op_origin:
+        origin
+        CONTINUE()
+
+    op_caller:
+        caller
+        CONTINUE()
+
+    op_callvalue:
+        callvalue
+        CONTINUE()
+
+    op_calldataload:
+        // Assumes the offset indicating the starting point of the  
+        // actual CALLDATA is stored in the last 32 bytes of CALLDATA.
+
+        // Assumes runtime code is encoded as follows:
+        // abi.encodePacked(runtimeCode, calldata, runtimeCode.length)
+
+        // NOTE: CALLDATASIZE is implemented as CODESIZE 
+        // and CALLDATALOAD is implemented as CODECOPY.
+
+        // takes            // [offset]
+        push1 0x20          // [0x20, offset]
+        calldatasize        // [calldatasize, 0x20, offset]
+        sub                 // [runtimCodeLengthOffset, offset]
+        calldataload        // [runtimeCodeLength, offset]
+        add                 // [runtimeCodeLength + offset]
+        
+        calldataload        // [value]
+        CONTINUE()
+
+    op_calldatasize:
+        // Assumes the offset indicating the starting point of the  
+        // actual CALLDATA is stored in the last 32 bytes of CALLDATA.
+
+        // Assumes runtime code is encoded as follows:
+        // abi.encodePacked(runtimeCode, calldata, runtimeCode.length)
+
+        // NOTE: CALLDATASIZE is implemented as CODESIZE 
+        // and CALLDATALOAD is implemented as CODECOPY.
+
+        // Parse runtimeCodeLength from contract code.
+        push1 0x20          // [0x20]
+        dup1                // [0x20, 0x20]
+        calldatasize        // [calldatasize, 0x20, 0x20]
+        sub                 // [runtimCodeLengthOffset, 0x20]
+        calldataload        // [runtimeCodeLength, 0x20]
+
+        // Compute and push the length of the calldata appended to contract code onto the stack.
+        // NOTE: We subtract an additional 32 bytes to account for the appended runtimeCodeLength.
+        calldatasize        // [calldatasize, runtimeCodeLength, 0x20]
+        sub                 // [calldatasize - runtimeCodeLength, 0x20]
+        sub                 // [value]
+
+        CONTINUE()
+
+    op_calldatacopy:
+        // Assumes the offset indicating the starting point of the  
+        // actual CALLDATA is stored in the last 32 bytes of CALLDATA.
+
+        // Assumes runtime code is encoded as follows:
+        // abi.encodePacked(runtimeCode, calldata, runtimeCode.length)
+
+        // NOTE: CALLDATASIZE is implemented as CODESIZE 
+        // and CALLDATALOAD is implemented as CODECOPY.
+
+        // takes                // [destOffset, offest, size]
+        FIX_MEMOFFSET()         // [fixed_destOffset, offest, size]
+        swap1                   // [offest, fixed_destOffset, size]
+
+        push1 0x20              // [0x20, offest, fixed_destOffset, size]
+        calldatasize            // [calldatasize, 0x20, offest, fixed_destOffset, size]
+        sub                     // [runtimCodeLengthOffset, offest, fixed_destOffset, size]
+        calldataload            // [runtimCodeLength, offest, fixed_destOffset, size]
+        add                     // [runtimCodeLength + offest, fixed_destOffset, size]
+        swap1                   // [fixed_destOffset, runtimCodeLength + offest, size]
+
+        calldatacopy            // [value]
+
+        CONTINUE()
+
+    op_codesize:
+        // when using the HyVM, the code resides in calldata
+        // codesize is really a calldatasize
+        calldatasize           // [value]
+
+        CONTINUE()
+
+    op_codecopy:
+        // [destOffset, offset, size]
+
+        // fix destOffset
+        FIX_MEMOFFSET()
+
+        // when using the HyVM, the code resides in calldata
+        // codecopy is really a calldatacopy
+        calldatacopy
+
+        CONTINUE()
+
+    op_gasprice:
+        gasprice
+        CONTINUE()
+
+    op_extcodesize:
+        extcodesize
+        CONTINUE()
+
+    op_extcodecopy:
+        // [address, destOffset, offset, size]
+
+        // fix destOffset
+        swap1
+        FIX_MEMOFFSET()
+        swap1
+
+        extcodecopy
+        CONTINUE()
+
+    op_returndatasize:
+        returndatasize
+        CONTINUE()
+
+    op_returndatacopy:
+        // [destOffset, offset, size]
+
+        // fix destOffset
+        FIX_MEMOFFSET()
+
+        returndatacopy
+        CONTINUE()
+
+    op_extcodehash:
+        extcodehash
+        CONTINUE()
+
+    op_blockhash:
+        blockhash
+        CONTINUE()
+
+    op_coinbase:
+        coinbase
+        CONTINUE()
+
+    op_timestamp:
+        timestamp
+        CONTINUE()
+
+    op_number:
+        number
+        CONTINUE()
+
+    op_difficulty:
+        difficulty
+        CONTINUE()
+
+    op_gaslimit:
+        gaslimit
+        CONTINUE()
+
+    op_chainid:
+        chainid
+        CONTINUE()
+
+    op_selfbalance:
+        selfbalance
+        CONTINUE()
+
+    op_basefee:
+        basefee
+        CONTINUE()
+
+    op_pop:
+        pop
+        CONTINUE()
+
+    op_mload:
+        // fix the memory offset load from, and execute
+        FIX_MEMOFFSET()
+        mload
+
+        CONTINUE()
+
+    op_mstore:
+        // fix the memory offset to store at, and execute
+        FIX_MEMOFFSET()
+        mstore
+
+        CONTINUE()
+
+    op_mstore8:
+        // fix the memory offset to store at, and execute
+        FIX_MEMOFFSET()
+        mstore8
+
+        CONTINUE()
+
+    op_sload:
+        sload
+        CONTINUE()
+
+    op_sstore:
+        // check can store things here
+        CHECK_SSTORE()
+        sstore
+        CONTINUE()
+
+    op_jump:
+        // [jumpTo]
+        // move pointer to location
+        GOTO_AND_ADVANCE() // => [opcode]
+
+        // check that the current opcode is a jumpdest
+        0x5B eq iszero op_jump_fail jumpi
+
+        CONTINUE()
+
+        op_jump_fail:
+            0x00 0x00 revert
+
+    op_jumpi:
+        // [jumpTo, condition]
+        swap1 // get the condition on top => [condition, jumpTo]
+        op_jump jumpi // goto jump if condition is ok, with [jumpTo] as stack
+        pop // remove [jumpTo] from stack
+        CONTINUE() // otherwise, continue
+
+    op_pc:
+        // load pointer, but it has advanced => remove 1
+        0x1
+        [EXEC_POINTER_MSLOT] mload
+        sub
+
+        CONTINUE()
+
+    op_msize:
+        // get hypervisor's reserved memory size
+        0x0
+        FIX_MEMOFFSET()
+
+        // fixed memory
+        msize
+        sub
+
+        CONTINUE()
+
+    op_gas:
+        gas
+        CONTINUE()
+
+    op_jumpdest:
+        // do nothing
+        CONTINUE()
+
+
+    op_push1:
+        0x01
+        PICK_DATA()
+        CONTINUE()
+    op_push2:
+        0x02
+        PICK_DATA()
+        CONTINUE()
+    op_push3:
+        0x03
+        PICK_DATA()
+        CONTINUE()
+    op_push4:
+        0x04
+        PICK_DATA()
+        CONTINUE()
+    op_push5:
+        0x05
+        PICK_DATA()
+        CONTINUE()
+    op_push6:
+        0x06
+        PICK_DATA()
+        CONTINUE()
+    op_push7:
+        0x07
+        PICK_DATA()
+        CONTINUE()
+    op_push8:
+        0x08
+        PICK_DATA()
+        CONTINUE()
+    op_push9:
+        0x09
+        PICK_DATA()
+        CONTINUE()
+    op_push10:
+        0x0a
+        PICK_DATA()
+        CONTINUE()
+    op_push11:
+        0x0b
+        PICK_DATA()
+        CONTINUE()
+    op_push12:
+        0x0c
+        PICK_DATA()
+        CONTINUE()
+    op_push13:
+        0x0d
+        PICK_DATA()
+        CONTINUE()
+    op_push14:
+        0x0e
+        PICK_DATA()
+        CONTINUE()
+    op_push15:
+        0x0f
+        PICK_DATA()
+        CONTINUE()
+    op_push16:
+        0x10
+        PICK_DATA()
+        CONTINUE()
+    op_push17:
+        0x11
+        PICK_DATA()
+        CONTINUE()
+    op_push18:
+        0x12
+        PICK_DATA()
+        CONTINUE()
+    op_push19:
+        0x13
+        PICK_DATA()
+        CONTINUE()
+    op_push20:
+        0x14
+        PICK_DATA()
+        CONTINUE()
+    op_push21:
+        0x15
+        PICK_DATA()
+        CONTINUE()
+    op_push22:
+        0x16
+        PICK_DATA()
+        CONTINUE()
+    op_push23:
+        0x17
+        PICK_DATA()
+        CONTINUE()
+    op_push24:
+        0x18
+        PICK_DATA()
+        CONTINUE()
+    op_push25:
+        0x19
+        PICK_DATA()
+        CONTINUE()
+    op_push26:
+        0x1a
+        PICK_DATA()
+        CONTINUE()
+    op_push27:
+        0x1b
+        PICK_DATA()
+        CONTINUE()
+    op_push28:
+        0x1c
+        PICK_DATA()
+        CONTINUE()
+    op_push29:
+        0x1d
+        PICK_DATA()
+        CONTINUE()
+    op_push30:
+        0x1e
+        PICK_DATA()
+        CONTINUE()
+    op_push31:
+        0x1f
+        PICK_DATA()
+        CONTINUE()
+    op_push32:
+        0x20
+        PICK_DATA()
+        CONTINUE()
+
+    op_dup1:
+        dup1
+        CONTINUE()
+    op_dup2:
+        dup2
+        CONTINUE()
+    op_dup3:
+        dup3
+        CONTINUE()
+    op_dup4:
+        dup4
+        CONTINUE()
+    op_dup5:
+        dup5
+        CONTINUE()
+    op_dup6:
+        dup6
+        CONTINUE()
+    op_dup7:
+        dup7
+        CONTINUE()
+    op_dup8:
+        dup8
+        CONTINUE()
+    op_dup9:
+        dup9
+        CONTINUE()
+    op_dup10:
+        dup10
+        CONTINUE()
+    op_dup11:
+        dup11
+        CONTINUE()
+    op_dup12:
+        dup12
+        CONTINUE()
+    op_dup13:
+        dup13
+        CONTINUE()
+    op_dup14:
+        dup14
+        CONTINUE()
+    op_dup15:
+        dup15
+        CONTINUE()
+    op_dup16:
+        dup16
+        CONTINUE()
+
+    op_swap1:
+        swap1
+        CONTINUE()
+    op_swap2:
+        swap2
+        CONTINUE()
+    op_swap3:
+        swap3
+        CONTINUE()
+    op_swap4:
+        swap4
+        CONTINUE()
+    op_swap5:
+        swap5
+        CONTINUE()
+    op_swap6:
+        swap6
+        CONTINUE()
+    op_swap7:
+        swap7
+        CONTINUE()
+    op_swap8:
+        swap8
+        CONTINUE()
+    op_swap9:
+        swap9
+        CONTINUE()
+    op_swap10:
+        swap10
+        CONTINUE()
+    op_swap11:
+        swap11
+        CONTINUE()
+    op_swap12:
+        swap12
+        CONTINUE()
+    op_swap13:
+        swap13
+        CONTINUE()
+    op_swap14:
+        swap14
+        CONTINUE()
+    op_swap15:
+        swap15
+        CONTINUE()
+    op_swap16:
+        swap16
+        CONTINUE()
+
+    op_log0:
+        FIX_MEMOFFSET()
+        log0
+        CONTINUE()
+    op_log1:
+        FIX_MEMOFFSET()
+        log1
+        CONTINUE()
+    op_log2:
+        FIX_MEMOFFSET()
+        log2
+        CONTINUE()
+    op_log3:
+        FIX_MEMOFFSET()
+        log3
+        CONTINUE()
+    op_log4:
+        FIX_MEMOFFSET()
+        log4
+        CONTINUE()
+
+    op_create:
+        swap1
+        FIX_MEMOFFSET()
+        swap1
+        create
+        CONTINUE()
+
+    op_call:
+        // takes            // [gas, address, value, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap3               // [argsOffset, address, value, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, value, gas, argsSize, retOffset, retSize]
+        swap3               // [gas, address, value, hyvmArgsOffset, argsSize, retOffset, retSize]
+
+        // fix retOffset
+        swap5               // [retOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, value, hyvmArgsOffset, argsSize, gas, retSize]
+        swap5               // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        // check can call
+        CHECK_CALL()        // [gas, address, value, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        call                // [success]
+        CONTINUE()
+
+    op_callcode:
+        // callcode is deprecated and generally considered unsafe
+        0x00 0x00 revert
+
+    op_return:
+        // takes         // [retOffset, retSize]
+        // fix retOffset
+        FIX_MEMOFFSET()  // [hyvmRetOffset, retSize]
+        return
+
+    op_delegatecall:
+        // takes                                   // [gas, address, argsOffset, argsSize, retOffset, retSize]
+
+        // fix argsOffset
+        swap2                                      // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()                            // [hyvmArgsOffset, gas, address, argsSize, retOffset, retSize]
+        swap2                                      // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
+
+        // fix retOffset
+        swap4                                      // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()                            // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4                                      // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        // check can call
+        CHECK_DELEGATECALL()                       // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        delegatecall                               // [success]
+        CONTINUE()
+
+    wrong_context:
+        0x00 0x00 revert
+
+    op_create2:
+        // takes        // [value, offset, size, salt]
+
+        // fix offset
+        swap1           // [offset, value, size, salt]
+        FIX_MEMOFFSET() // [hyvmOffset, value, size, salt]
+        swap1           // [value, hyvmOffset, size, salt]
+        create2         // [success]
+        CONTINUE()
+
+    op_staticcall:
+        // takes            // [gas, address, argsOffset, argsSize, retOffset, retSize]
+        // fix argsOffset
+        swap2               // [argsOffset, address, gas, argsSize, retOffset, retSize]
+        FIX_MEMOFFSET()     // [hyvmArgsOffset, address, gas, argsSize, retOffset, retSize]
+        swap2               // [gas, address, hyvmArgsOffset, argsSize, retOffset, retSize]
+
+        // fix retOffset
+        swap4               // [retOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        FIX_MEMOFFSET()     // [hyvmRetOffset, address, hyvmArgsOffset, argsSize, gas, retSize]
+        swap4               // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        // check can call
+        CHECK_STATICCALL()  // [gas, address, hyvmArgsOffset, argsSize, hyvmRetOffset, retSize]
+
+        staticcall          // [success]
+        CONTINUE()
+
+    op_revert:
+        // takes        // [offset, size]
+        FIX_MEMOFFSET() // [hyvmOffset, size]
+        revert          // [hyvmOffset, size]
+        CONTINUE()
+
+    op_invalid:
+        invalid
+        CONTINUE()
+
+    selfdestruct:
+        // reverts to avoid malicious or erroneous selfdestruct
+        0x00 0x00 revert
+
+    unused:
+        0x00 0x00 revert
+}
