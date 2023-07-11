@@ -99,6 +99,11 @@ Thus, the actual memory of the host is starting at either 0x340 or 0x460 dependi
 ⚠️ The HyVM skips `jumpdest` (0x5B) validations that might appear in `push` opcodes values. This is OK if the executed bytecode is well formed (for instance, if you compiled it using `solc` or equivalent). But if you feed broken bytecode to the HyVM, this could lead to some discrepancies between the HyVM and the actual EVM behaviour.  
 There is an open issue to implement the validation if needed [here](https://github.com/oguimbal/HyVM/issues/16).
 
+## Compatibility
+
+The HyVM does not yet support `PUSH0` as most of the chains do not support it.
+It is compiled with `Paris` EVM version.
+
 ## HyVM / EVM divergence
 
 The HyVM consistently behaves as if the executed code did not receive any calldata.  
