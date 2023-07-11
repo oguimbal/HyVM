@@ -10,7 +10,7 @@ contract Deploy is Script {
     Deployer public constant DEPLOYER = Deployer(0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2);
 
     function run() public returns (address deployedAddress) {
-        string memory bashCommand = 'cast abi-encode "f(bytes)" $(huffc ./src/HyVM.huff --bytecode | head)';
+        string memory bashCommand = 'cast abi-encode "f(bytes)" $(huffc ./src/HyVM.huff --bytecode -e paris | head)';
 
         string[] memory inputs = new string[](3);
         inputs[0] = "bash";
