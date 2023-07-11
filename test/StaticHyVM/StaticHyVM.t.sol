@@ -14,7 +14,7 @@ contract TestStaticHyVM is Test {
     bytes public bytecode;
 
     function setUp() public {
-        hyvm = HuffDeployer.deploy("HyVM");
+        hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         vm.label(hyvm, "HyVM");
 
         staticHyvm = new StaticHyVM(hyvm);

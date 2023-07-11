@@ -21,7 +21,7 @@ contract LimitSwapsTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
-        hyvm = HuffDeployer.deploy("HyVM");
+        hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();
 
         maximumStackSizeHyvmBytecode = type(AbsurdDeclaration).creationCode;

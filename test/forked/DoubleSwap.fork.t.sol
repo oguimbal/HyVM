@@ -23,10 +23,10 @@ contract DoubleSwapTests is Test {
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("eth"));
         owner = address(this);
-        hyvm = HuffDeployer.deploy("HyVM");
+        hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();
 
-        doubleSwapHuff = HuffDeployer.deploy("../test/forked/calls/doubleSwap/DoubleSwap");
+        doubleSwapHuff = HuffDeployer.config().with_evm_version("paris").deploy("../test/forked/calls/doubleSwap/DoubleSwap");
         doubleSwap = new DoubleSwap();
         doubleswapHyvmBytecode = type(DoubleSwap).runtimeCode;
     }

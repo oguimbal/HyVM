@@ -29,7 +29,7 @@ contract GMXTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("arbi"));
         owner = address(this);
-        hyvm = HuffDeployer.deploy("HyVM");
+        hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();
         gmxLong = new GMXLong();
         gmxLongHyvmBytecode = type(GMXLong).runtimeCode;
