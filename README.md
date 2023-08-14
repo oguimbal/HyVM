@@ -101,8 +101,9 @@ There is an open issue to implement the validation if needed [here](https://gith
 
 ## Compatibility
 
-The HyVM does not yet support `PUSH0` as most of the chains do not support it.
-It is compiled with `Paris` EVM version.
+The HyVM supports `PUSH0`. It possible execute bytecode compiled with `Shanghai` EVM version.
+As the HyVM is deployed with the `Paris` EVM version, it will be converted to `PUSH1 0x00` during the execution.
+This is due to the fact that most chains do not support `PUSH0` yet.
 
 ## HyVM / EVM divergence
 
