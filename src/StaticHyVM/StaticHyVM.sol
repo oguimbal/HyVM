@@ -29,6 +29,7 @@ contract StaticHyVM {
     /// @return data Return data from delegate call
     function doDelegateCall(bytes calldata payload) public returns (bytes memory) {
         if (msg.sender != address(this)) revert OnlySelf();
+        if (hyvm.code.length == 0) revert AddressNotContract(hyvm);
 
         (bool success, bytes memory data) = hyvm.delegatecall(payload);
         if (!success) _bubbleError(data, "StaticHyVM: delegatecall failed");

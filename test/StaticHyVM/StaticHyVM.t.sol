@@ -42,6 +42,14 @@ contract TestStaticHyVM is Test {
         staticHyvm.doDelegateCall("");
     }
 
+    function testCannotStaticExecIfHyVMNotContract() public {
+        // Sets the bytecode of the hyvm to be empty
+        // It will emulate the case where the address is not a contract
+        vm.etch(hyvm, bytes(""));
+        vm.expectRevert(abi.encodeWithSelector(StaticHyVM.AddressNotContract.selector, hyvm));
+        staticHyvm.staticExec(bytes(""));
+    }
+
     function testCannotStaticExecWriteFunction() public {
         bytecode = Utils.replaceSelectorBypassCalldataSizeCheck(bytecode, hex"c350518d");
 
