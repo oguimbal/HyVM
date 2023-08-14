@@ -1,0 +1,8 @@
+PUSH0
+
+# return result
+PUSH0
+MSTORE
+PUSH1 0x20
+PUSH0
+RETURN

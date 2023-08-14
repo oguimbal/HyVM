@@ -447,6 +447,14 @@ contract OpcodesTest is Test {
         assertEq(result, 0x43);
     }
 
+    function testPush0() public {
+        // bytecode generated using: easm test/opcodes/push0 but push0 is not supported hence added by hand
+        (bool success, bytes memory data) = hyvm.delegatecall(hex"5f5f5260205ff3");
+        assertEq(success, true);
+        uint256 result = abi.decode(data, (uint256));
+        assertEq(result, uint256(0));
+    }
+
     function testPush1() public {
         // bytecode generated using: easm test/opcodes/push1
         (bool success, bytes memory data) = hyvm.delegatecall(hex"60ff60005260ff6000f3");
