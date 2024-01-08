@@ -2,11 +2,11 @@
   <h1>HyVM</h1>
   <img height="60" alt="logo" src="./static/eth.png">
   <span style="margin: 10px;">&nbsp;&nbsp;&nbsp;&nbsp;✕&nbsp;&nbsp;&nbsp;&nbsp;</span>
-  <img src="./static/nested.png" height="60" />
+  <img src="./static/mass.png" height="60" />
 </div>
 
 <div align="center">
-  <h3>...the execution core of <a href="https://nested.fi">nested.fi</a></h3>
+  <h3>...the execution core of <a href="https://mass.money">mass.money</a></h3>
   <br>
   HyVM is an Ethereum Virtual Machine (EVM) Hypervisor written in <a href="https://huff.sh/">Huff</a>, allowing the execution of arbitrary EVM Bytecode.
   <br>
@@ -121,25 +121,14 @@ Consequently, there are some opcodes divergence:
 
 ## Addresses
 
-Deployed at `0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195` on:
-
-- [Ethereum](https://etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Polygon](https://polygonscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [BNB Chain](https://bscscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Arbitrum](https://arbiscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Avalanche](https://snowtrace.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Optimism](https://optimistic.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Fantom](https://ftmscan.com/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Aurora](https://aurorascan.dev/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Goerli](https://goerli.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
-- [Sepolia](https://sepolia.etherscan.io/address/0xCB70efa43300Cd9B7eF4ed2087ceA7f7f6f3c195#code)
+Deployed at `0x25DCBb6E9799E82450B48c4B7aD04Ff7B93bf0AE` on [Polygon](https://polygonscan.com/address/0x25DCBb6E9799E82450B48c4B7aD04Ff7B93bf0AE)
 
 ## Getting Started
 
 You will need:
-* [Huff](https://docs.huff.sh/get-started/installing/) (`huffc 0.3.1` / `nightly-94c34e402a46365fee29863aa08558af178c2b94`)  
+* [Huff](https://docs.huff.sh/get-started/installing/) (`huffc 0.3.2` / `nightly-813b6b683dd214dfca71d49284afd885dd9eef09`)
 This is the last version with which the HyVM was tested.
-It is not possible to pin the Huffc version in CI consistently as pre-released versions are pruned and only the 3 newest nightlies are kept. So it is not pinned in CI.
+It is not possible to pin the Huffc version in CI consistently as pre-released versions are pruned and only the 3 newest nightlies are kept.
 * [Foundry/Forge](https://github.com/foundry-rs/foundry)
 
 You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler).  
@@ -151,5 +140,5 @@ You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble byteco
 Example of how to deploy to Polygon:
 
 ```bash
-forge script --private-key XXXXXXXXXXXXX --chain-id 137 --rpc-url https://polygon-rpc.com --froms 0x945f803f01F443616546d1F31466c0E7ACfF36f7 --sender 0x945f803f01F443616546d1F31466c0E7ACfF36f7 script/Deploy.s.sol --broadcast --gas-price 40000000000 --gas-limit 9632030 --legacy
+forge script script/Deploy.s.sol --private-key XXXXXXXXXXXXX --chain-id 137 --rpc-url https://polygon-rpc.com --broadcast
 ```
