@@ -304,8 +304,8 @@
         number
         CONTINUE()
 
-    op_difficulty:
-        difficulty
+    op_prevrandao:
+        prevrandao
         CONTINUE()
 
     op_gaslimit:

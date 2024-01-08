@@ -1,0 +1,8 @@
+PREVRANDAO
+
+# return result
+PUSH1 0x0
+MSTORE
+PUSH1 0x20
+PUSH1 0x00
+RETURN
