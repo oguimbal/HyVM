@@ -7,7 +7,7 @@ import "foundry-huff/HuffDeployer.sol";
 /// @notice Deploy the HyVM using CREATE2
 contract Deploy is Script {
     // The address is the same on all EVM chains.
-    Deployer public constant DEPLOYER = Deployer(0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2);
+    ICreateX public constant DEPLOYER = ICreateX(0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed);
 
     function run() public returns (address deployedAddress) {
         string memory bashCommand = 'cast abi-encode "f(bytes)" $(huffc ./src/HyVM.huff --bytecode -e paris | head)';
@@ -18,16 +18,19 @@ contract Deploy is Script {
         inputs[2] = bashCommand;
 
         bytes memory bytecode = abi.decode(vm.ffi(inputs), (bytes));
-        bytes32 salt = keccak256("HyVM_V1");
-
-        deployedAddress = DEPLOYER.computeAddress(salt, keccak256(bytecode));
-
+        // See createX documentation for more information on salt:
+        // * address(0) allows for permissionless deployment
+        // * hex"00" no cross-chain redeploy protection
+        bytes32 salt = bytes32(abi.encodePacked(address(0), hex"00", bytes11(uint88(uint256(keccak256("HyVM_V1"))))));
+        bytes32 guardedSalt = keccak256(abi.encode(salt));
         vm.startBroadcast();
 
         // Call CREATE2 Deployer
-        DEPLOYER.deploy(0, salt, bytecode);
+        deployedAddress = DEPLOYER.deployCreate2(salt, bytecode);
+        address computedDeployedAddress = DEPLOYER.computeCreate2Address(guardedSalt, keccak256(bytecode));
 
         // Check if contract deployed at expected address
+        require(deployedAddress == computedDeployedAddress);
         require(deployedAddress.code.length > 0, "HyVM not deployed");
 
         vm.stopBroadcast();
@@ -36,10 +39,15 @@ contract Deploy is Script {
     }
 }
 
-// Create2 Deployer Interface
-// https://github.com/pcaversaccio/create2deployer
-interface Deployer {
-    function deploy(uint256 value, bytes32 salt, bytes memory code) external;
-
-    function computeAddress(bytes32 salt, bytes32 codeHash) external returns (address);
+/**
+ * @title CreateX Factory Interface Definition
+ * @author pcaversaccio (https://web.archive.org/web/20230921103111/https://pcaversaccio.com/)
+ * @custom:coauthor Matt Solomon (https://web.archive.org/web/20230921103335/https://mattsolomon.dev/)
+ */
+interface ICreateX {
+    function deployCreate2(bytes32 salt, bytes memory initCode) external payable returns (address newContract);
+    function computeCreate2Address(bytes32 salt, bytes32 initCodeHash)
+        external
+        view
+        returns (address computedAddress);
 }
