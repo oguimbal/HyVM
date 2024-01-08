@@ -27,7 +27,7 @@ contract GMXTest is Test {
 
     //  =====   Set up  =====
     function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("arbi"));
+        vm.createSelectFork(vm.rpcUrl("arbi"), 163870012);
         owner = address(this);
         hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();

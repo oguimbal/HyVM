@@ -21,7 +21,7 @@ contract AaveTests is Test {
     ILendingPool lendingPool = ILendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
 
     function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("eth"));
+        vm.createSelectFork(vm.rpcUrl("eth"), 18868834);
         owner = address(this);
         hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();

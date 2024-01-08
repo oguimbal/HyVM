@@ -21,7 +21,7 @@ contract MorphoTests is Test {
     ILens lens = ILens(0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67);
 
     function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("eth"));
+        vm.createSelectFork(vm.rpcUrl("eth"), 18868834);
         owner = address(this);
         hyvm = HuffDeployer.config().with_evm_version("paris").deploy("HyVM");
         callHyvm = new CallHyvm();
