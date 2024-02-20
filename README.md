@@ -11,7 +11,7 @@
   HyVM is an Ethereum Virtual Machine (EVM) Hypervisor written in <a href="https://huff.sh/">Huff</a>, allowing the execution of arbitrary EVM Bytecode.
   <br>
   <br>
-  <h3> 👉 See it in action with <a href="https://hyvm.nested.fi/">HyVM live playground</a></h3>
+  <h3> 👉 See it in action with <a href="https://hyvm.mass.money/">HyVM live playground</a></h3>
 </div>
 
 <br>
