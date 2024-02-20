@@ -1148,13 +1148,22 @@ contract OpcodesTest is Test {
         assertTrue(success, "expectRevert: call did not revert");
     }
 
-    function testPrevrandao(uint256 prevrandao) public {
+    /// @dev difficulty is used for evm_version before Paris.
+    ////     If used on unsupported EVM versions it will revert.
+    ///      In that case it will use prevrandao instead.
+    function testPrevrandaoDifficulty(uint256 prevrandaoDifficulty) public {
         // bytecode generated using: easm test/opcodes/prevrandao
-        // EVM-Assembler does not implement it, so it is added manually
-        vm.prevrandao(bytes32(prevrandao));
+        // EVM-Assembler does not implement PREVRANDAO, so it is added manually
+        // Note: It is the same underlying opcode for prevrandao and difficulty
+        //       It is only a name change.
+        //       https://eips.ethereum.org/EIPS/eip-4399
+        try vm.difficulty(prevrandaoDifficulty) {}
+        catch {
+            vm.prevrandao(bytes32(prevrandaoDifficulty));
+        }
         (bool success, bytes memory data) = hyvm.delegatecall(hex"4460005260206000f3");
         assertEq(success, true);
         (uint256 result) = abi.decode(data, (uint256));
-        assertEq(result, prevrandao);
+        assertEq(result, prevrandaoDifficulty);
     }
 }

@@ -134,6 +134,15 @@ It is not possible to pin the Huffc version in CI consistently as pre-released v
 You can find `easm`, the basic EVM assembly compiler that is used to compile tests [here](https://github.com/oguimbal/EVM-Assembler).  
 You can use [pyevmasm](https://github.com/crytic/pyevmasm) to disassemble bytecode.
 
+### How to test
+
+It is possible to test for different versions of solidity or different EVM versions.
+It is set to `paris` by default in the `foundry.toml` file but it is also
+compatible with `shanghai`.
+
+```bash
+forge test
+```
 
 ### How to deploy
 
